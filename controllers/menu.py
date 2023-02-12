@@ -25,7 +25,9 @@ class Menu:
 
     selected = property(__get_selected, __set_selected)
 
-    def event(self, event):
+    def events(self, event):
+        if self.game.state != self:
+            return
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
                 self.selected = self.__selected - 1
@@ -37,6 +39,8 @@ class Menu:
             self.update()
 
     def update(self):
+        if self.game.state != self:
+            return
         # For each text, if it is selected, draw it with the selected color, otherwise draw it with the normal color
         for i, text in enumerate(self.texts):
             if i == self.__selected:

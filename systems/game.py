@@ -4,6 +4,7 @@ from systems.settings import Settings
 import pygame
 
 from controllers.menu import Menu
+from controllers.partie import Partie
 
 from menu_actions.main_menu import main_menu_options, main_menu_style
 
@@ -25,7 +26,7 @@ class Game:
 
         self.states = {
             "main_menu": Menu("Menu Principal", self, main_menu_options(), main_menu_style()),
-            "game": None,
+            "game": Partie(0, 0, None),
             "pause_menu": None,
             "settings_menu": None,
         }
@@ -38,8 +39,9 @@ class Game:
 
     def __set_state(self, value):
         if value in self.states:
+            previous_state = self.__state
             self.__state = value
-            self.update()
+            self.update(previous_state)
         else:
             raise ValueError("Invalid state")
 
@@ -60,10 +62,14 @@ class Game:
                 self.close()
                 sys.exit()
             else:
-                self.state.event(event)
+                self.state.events(event)
 
-    def update(self):
-        pass
+    def update(self, previous_state):
+        if previous_state == "main_menu" and self.__state == "game":
+            # Todo, set players from main menu
+            # Todo, Implement choose a number, then reuse it for settings
+            # Todo, Implement loading screen before terrain generation
+            self.states["game"] = Partie(2, 4, self)
 
     def draw(self):
         self.state.draw(self.window)
