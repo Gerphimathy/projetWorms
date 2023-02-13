@@ -69,7 +69,7 @@ class Game:
             # Todo, set players from main menu
             # Todo, Implement choose a number, then reuse it for settings
             # Todo, Implement loading screen before terrain generation
-            self.states["game"] = Partie(2, 4, self)
+            self.states["game"] = Partie(4, 4, self)
 
     def draw(self):
         self.state.draw(self.window)

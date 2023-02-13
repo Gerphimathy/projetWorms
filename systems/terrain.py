@@ -4,12 +4,13 @@ import noise
 
 import time
 
+import numpy as np
 
 def generate_terrain(w, h, type="flat"):
     # generate  random noise array with 0,1 values
     # 0 = air
     # 1 = rock
-    noise_array = [[0 for x in range(w)] for y in range(h)]
+    noise_array = np.zeros((w, h))
     if type == "cave":
         # Complex cave like structure
         for x in range(w):
@@ -48,7 +49,7 @@ def generate_terrain(w, h, type="flat"):
             if type == "mountainous":
                 factor = 500
 
-            maxY = h // 4 + factor*vertical_noise[x]
+            maxY = h // 2 + factor*vertical_noise[x]
             for y in range(h):
                 if y > maxY:
                     noise_array[x][y] = 1

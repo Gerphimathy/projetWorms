@@ -1,6 +1,11 @@
+from random import random
+
 import pygame
 
 import systems.terrain
+
+from entities.worm import Worm
+from entities.player import Player
 
 
 class Partie:
@@ -8,15 +13,48 @@ class Partie:
         if game is None:
             return
 
-        self.players = players
         self.game = game
-        self.w_p_player = w_p_player
+
+        # TODO: color choice ?
+        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
+        self.players = [Player(colors[_], w_p_player, self.game) for _ in range(players)]
+
         self.turn = 0
         # Todo: Terrain size parameters and handle screen size being bigger than terrain size
-        self.dimensions = (2000, 2000)
+        self.dimensions = (1020, 768)
         terrain_type = input("Terrain type (flat, cave, bumpy, mountainous): ")
         self.terrain = systems.terrain.generate_terrain(self.dimensions[0], self.dimensions[1], terrain_type)
         print("Terrain generated")
+
+        nb_worms = players * w_p_player
+        parts = self.dimensions[0] // nb_worms
+        for k in range(nb_worms):
+            player_index = k % w_p_player
+            worm_index = k // w_p_player
+            # If terrain type is flat, bumpy or mountain, place the worms at the top of the terrain
+            if terrain_type == "flat" or terrain_type == "bumpy" or terrain_type == "mountainous":
+                self.players[player_index].worms[worm_index].x = int(parts * (k + 0.5))
+                for y in range(self.dimensions[1]):
+                    if self.terrain[self.players[player_index].worms[worm_index].x][y] == 1:
+                        self.players[player_index].worms[worm_index].y = y - 1
+                        break
+
+            # if terrain type is cave,
+            # place the worms at a random x, with X y pair of coordinates,
+            # within a horizontal slice of the terrain
+            # within empty space and with ground below
+            elif terrain_type == "cave":
+                horizontal_slice = ((self.dimensions[0] // nb_worms) * k, (self.dimensions[0] // nb_worms) * (k + 1))
+                # Divide the vertical space into three parts
+                height_third = (k % 2) + 1
+                vertical_slice = (self.dimensions[1] // (height_third + 1), self.dimensions[1] // height_third)
+                for x in range(horizontal_slice[0], horizontal_slice[1]):
+                    for y in range(vertical_slice[0], vertical_slice[1]):
+                        if self.terrain[x][y] == 0 and self.terrain[x][y + 1] == 1:
+                            self.players[player_index].worms[worm_index].x = x
+                            self.players[player_index].worms[worm_index].y = y
+                            break
+
         self.top_left = (0, 0)
         self.draw()
 
@@ -63,3 +101,13 @@ class Partie:
                 cell = self.terrain[x + self.top_left[0]][y + self.top_left[1]]
                 color = (255 * cell / 2, 255 * cell / 2, 255 * cell / 2)
                 self.game.window.set_at((x, y), color)
+
+        for player in self.players:
+            for worm in player.worms:
+                if not worm.alive:
+                    continue
+                if worm.x < self.top_left[0] or worm.x > self.top_left[0] + self.game.settings.width:
+                    continue
+                if worm.y < self.top_left[1] or worm.y > self.top_left[1] + self.game.settings.height:
+                    continue
+                worm.draw()
