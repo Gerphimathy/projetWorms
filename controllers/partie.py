@@ -22,9 +22,11 @@ class Partie:
         self.turn = 0
         # Todo: Terrain size parameters and handle screen size being bigger than terrain size
         self.dimensions = (1020, 768)
-        terrain_type = input("Terrain type (flat, cave, bumpy, mountainous): ")
+        terrain_type = input("Terrain type (flat, cave, bumpy, mountainous, extreme): ")
         self.terrain = systems.terrain.generate_terrain(self.dimensions[0], self.dimensions[1], terrain_type)
         print("Terrain generated")
+
+        self.water_level = 0.05
 
         nb_worms = players * w_p_player
         parts = self.dimensions[0] // nb_worms
@@ -32,7 +34,7 @@ class Partie:
             player_index = k % w_p_player
             worm_index = k // w_p_player
             # If terrain type is flat, bumpy or mountain, place the worms at the top of the terrain
-            if terrain_type == "flat" or terrain_type == "bumpy" or terrain_type == "mountainous":
+            if terrain_type in ["flat", "bumpy", "mountainous", "extreme"]:
                 self.players[player_index].worms[worm_index].x = int(parts * (k + 0.5))
                 for y in range(self.dimensions[1]):
                     if self.terrain[self.players[player_index].worms[worm_index].x][y] == 1:
@@ -80,6 +82,9 @@ class Partie:
     def update(self):
         pass
 
+    def isUnderWater(self, y):
+        return y < self.dimensions[1] - (self.dimensions[1] * self.water_level)
+
     def draw(self):
         width = self.game.settings.width
         height = self.game.settings.height
@@ -99,7 +104,11 @@ class Partie:
         for x in range(width):
             for y in range(height):
                 cell = self.terrain[x + self.top_left[0]][y + self.top_left[1]]
-                color = (255 * cell / 2, 255 * cell / 2, 255 * cell / 2)
+                if self.isUnderWater(y + self.top_left[1]):
+                    color = (255 * cell / 2, 255 * cell / 2, 255 * cell / 2)
+                else:
+                    color = (0, 0, 255 * ((cell+1)/2))
+
                 self.game.window.set_at((x, y), color)
 
         for player in self.players:

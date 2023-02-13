@@ -1,4 +1,5 @@
 # Si vous avez des problèmes avec noise, il y a des chances qu'il faille les microsoft C++ build tools
+import math
 
 import noise
 
@@ -19,7 +20,7 @@ def generate_terrain(w, h, type="flat"):
                 # Persistence: higher = messiness of the noise/brokenness
                 # Lacunarity: higher = more stuff
 
-                noise_array[x][y] = noise.pnoise2(x / 100, y / 100, octaves=4, persistence=0.5, lacunarity=2.0,
+                noise_array[x][y] = noise.pnoise2(x / 100, y / 100, octaves=4, persistence=0.2, lacunarity=2.0,
                                                   repeatx=w, repeaty=h, base=0)
                 if noise_array[x][y] < 0:
                     noise_array[x][y] = 1
@@ -34,12 +35,8 @@ def generate_terrain(w, h, type="flat"):
                 else:
                     noise_array[x][y] = 0
 
-    elif type == "bumpy" or type == "mountainous":
+    elif type == "bumpy" or type == "mountainous" or type == "extreme":
         # Bumpy terrain is generally flat with vertical cliffs
-
-        vertical_noise = [0 for x in range(w)]
-        for x in range(w):
-            vertical_noise[x] = noise.pnoise2(x / 100, w/100, octaves=4, persistence=0.5, lacunarity=2.0, base=0)
 
         for x in range(w):
             # Increase the factor to make the cliffs more vertical
@@ -48,8 +45,14 @@ def generate_terrain(w, h, type="flat"):
                 factor = 100
             if type == "mountainous":
                 factor = 500
+            if type == "extreme":
+                factor = 1500
 
-            maxY = h // 2 + factor*vertical_noise[x]
+            maxY = noise.pnoise2(x / 100, w/100, octaves=4, persistence=0.2, lacunarity=2.0, base=0)
+            maxY *= factor
+            maxY += h
+            maxY /= (math.sin(x*math.pi/w)+1)
+            maxY = int(maxY)
             for y in range(h):
                 if y > maxY:
                     noise_array[x][y] = 1
