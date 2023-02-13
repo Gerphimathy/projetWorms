@@ -3,3 +3,5 @@ venv
 
 # any __pycache__ directories
 __pycache__
+
+settings.txt
