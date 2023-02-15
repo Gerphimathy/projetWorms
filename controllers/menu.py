@@ -5,6 +5,7 @@ from controllers.menu_option import MenuOption, LateralMenuOption
 
 class Menu:
     def __init__(self, name, game, options=None, style=None):
+        self.data = {}
         self.texts = []
         self.name = name
         self.game = game

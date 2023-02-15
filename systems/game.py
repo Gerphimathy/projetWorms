@@ -11,6 +11,10 @@ from menu_actions.main_menu import main_menu_options
 from menu_actions.menu_style import default_menu_style
 
 from menu_actions.settings_menu import settings_options
+
+from menu_actions.pregame_menu import pregame_menu_options
+
+
 class Game:
     def __init__(self):
         self.settings = Settings()
@@ -28,7 +32,8 @@ class Game:
 
         self.states = {
             "main_menu": Menu("Menu Principal", self, main_menu_options(), default_menu_style()),
-            "game": Partie(0, 0, None),
+            "pregame_menu": Menu("Préparation de la partie", self, pregame_menu_options(), default_menu_style()),
+            "game": Partie(None, 0, 0, "flat"),
             "pause_menu": None,
             "settings_menu": Menu("Options", self, settings_options(self), default_menu_style()),
         }
@@ -67,11 +72,9 @@ class Game:
                 self.state.events(event)
 
     def update(self, previous_state):
-        if previous_state == "main_menu" and self.__state == "game":
-            # Todo, set players from main menu
-            # Todo, Implement choose a number, then reuse it for settings
-            # Todo, Implement loading screen before terrain generation
-            self.states["game"] = Partie(4, 4, self)
+        if previous_state == "pregame_menu" and self.__state == "game":
+            data = self.states[previous_state].data
+            self.states["game"] = Partie(self, data["player_count"], data["worms_per_player"], data["map_type"])
         else:
             self.state.draw(self.window)
 

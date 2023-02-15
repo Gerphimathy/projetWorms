@@ -9,7 +9,7 @@ from entities.player import Player
 
 
 class Partie:
-    def __init__(self, players, w_p_player, game):
+    def __init__(self, game, players, w_p_player, terrain_type):
         if game is None:
             return
 
@@ -21,18 +21,16 @@ class Partie:
 
         self.turn = 0
         # Todo: Terrain size parameters and handle screen size being bigger than terrain size
-        self.dimensions = (1020, 768)
-        terrain_type = input("Terrain type (flat, cave, bumpy, mountainous, extreme): ")
+        self.dimensions = (game.settings.width, game.settings.height)
         self.terrain = systems.terrain.generate_terrain(self.dimensions[0], self.dimensions[1], terrain_type)
-        print("Terrain generated")
 
         self.water_level = 0.05
 
         nb_worms = players * w_p_player
         parts = self.dimensions[0] // nb_worms
         for k in range(nb_worms):
-            player_index = k % w_p_player
-            worm_index = k // w_p_player
+            player_index = k // w_p_player
+            worm_index = k % w_p_player
             # If terrain type is flat, bumpy or mountain, place the worms at the top of the terrain
             if terrain_type in ["flat", "bumpy", "mountainous", "extreme"]:
                 self.players[player_index].worms[worm_index].x = int(parts * (k + 0.5))
@@ -62,7 +60,7 @@ class Partie:
 
     def events(self, event):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            self.game.state = "pause_menu"
+            self.game.state = "main_menu"
 
         keys = pygame.key.get_pressed()
         # Get 5 % of the dimensions of the window

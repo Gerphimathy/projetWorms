@@ -10,7 +10,7 @@ def main_menu_options():
 
     def play(self):
         def inner():
-            self.menu.game.state = 'game'
+            self.menu.game.state = 'pregame_menu'
         return inner
 
     def options(self):
