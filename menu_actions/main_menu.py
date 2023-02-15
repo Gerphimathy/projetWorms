@@ -3,6 +3,7 @@ import sys
 
 import pygame
 
+import menu_actions.menu_style as style
 
 def main_menu_options():
     # Each name, function pair will be attributed to a menu_option object
@@ -23,17 +24,5 @@ def main_menu_options():
             sys.exit()
         return inner
 
-    return [('Jouer', play), ('Options', options), ('Quitter le jeu', close)]
+    return [('Jouer', play, None), ('Options', options, None), ('Quitter le jeu', close, None)]
 
-
-def main_menu_style():
-    # pygame display style
-
-    # IMPORTANT: Font must be BELOW background, otherwise the background will cover the font
-    return {
-        'background_color': (120, 120, 120),
-        'background_image': None,
-        'font': pygame.font.Font('assets/fonts/arial.ttf', 30),
-        'font_color': (0, 0, 0),
-        'font_selected_color': (255, 0, 0),
-    }

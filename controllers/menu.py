@@ -1,6 +1,6 @@
 import pygame
 
-from controllers.menu_option import MenuOption
+from controllers.menu_option import MenuOption, LateralMenuOption
 
 
 class Menu:
@@ -8,8 +8,15 @@ class Menu:
         self.texts = []
         self.name = name
         self.game = game
-        options = options if options is not None else []
-        self.options = [MenuOption(self, option[0], option[1]) for option in options]
+        self.options = options if options is not None else []
+        for option in options:
+            if option[2] is None:
+                self.options[self.options.index(option)] = MenuOption(self, option[0], option[1])
+            else:
+                if option[2] == "lateral":
+                    self.options[self.options.index(option)] = LateralMenuOption(self, option[0], option[1], option[3],
+                                                                                 option[4])
+
         self.__selected = 0
         self.style = style if style is not None else {}
 
@@ -35,6 +42,12 @@ class Menu:
                 self.selected = self.__selected + 1
             elif event.key == pygame.K_RETURN:
                 self.selected.action()
+            elif event.key == pygame.K_LEFT:
+                if self.selected.__class__.__name__ == 'LateralMenuOption':
+                    self.selected.value = self.selected.value - 1
+            elif event.key == pygame.K_RIGHT:
+                if self.selected.__class__.__name__ == 'LateralMenuOption':
+                    self.selected.value = self.selected.value + 1
 
             self.update()
 
@@ -42,13 +55,20 @@ class Menu:
         if self.game.state != self:
             return
         # For each text, if it is selected, draw it with the selected color, otherwise draw it with the normal color
+
+        for key, value in self.style.items():
+            if key == 'background_color':
+                self.game.window.fill(value)
+            elif key == 'background_image' and value is not None:
+                self.game.window.blit(value, (0, 0))
+
         for i, text in enumerate(self.texts):
             if i == self.__selected:
-                text = self.style['font'].render(self.options[i].text, True, self.style['font_selected_color'])
+                text = self.style['font'].render(str(self.options[i]), True, self.style['font_selected_color'])
                 self.texts[i] = text
                 self.game.window.blit(text, (0, i * 30))
             else:
-                text = self.style['font'].render(self.options[i].text, True, self.style['font_color'])
+                text = self.style['font'].render(str(self.options[i]), True, self.style['font_color'])
                 self.texts[i] = text
                 self.game.window.blit(text, (0, i * 30))
 
@@ -63,9 +83,8 @@ class Menu:
             elif key == 'font':
                 for i, option in enumerate(self.options):
                     if i == self.__selected:
-                        text = value.render(option.text, True, self.style['font_selected_color'])
+                        text = value.render(str(option), True, self.style['font_selected_color'])
                     else:
-                        text = value.render(option.text, True, self.style['font_color'])
+                        text = value.render(str(option), True, self.style['font_color'])
                     self.texts += (text,)
                     window.blit(text, (0, i * 30))
-

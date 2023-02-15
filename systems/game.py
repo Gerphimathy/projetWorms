@@ -6,9 +6,11 @@ import pygame
 from controllers.menu import Menu
 from controllers.partie import Partie
 
-from menu_actions.main_menu import main_menu_options, main_menu_style
+from menu_actions.main_menu import main_menu_options
 
+from menu_actions.menu_style import default_menu_style
 
+from menu_actions.settings_menu import settings_options
 class Game:
     def __init__(self):
         self.settings = Settings()
@@ -25,10 +27,10 @@ class Game:
         self.clock.tick(self.settings.fps)
 
         self.states = {
-            "main_menu": Menu("Menu Principal", self, main_menu_options(), main_menu_style()),
+            "main_menu": Menu("Menu Principal", self, main_menu_options(), default_menu_style()),
             "game": Partie(0, 0, None),
             "pause_menu": None,
-            "settings_menu": None,
+            "settings_menu": Menu("Options", self, settings_options(self), default_menu_style()),
         }
         self.__state = "main_menu"
 
@@ -70,6 +72,8 @@ class Game:
             # Todo, Implement choose a number, then reuse it for settings
             # Todo, Implement loading screen before terrain generation
             self.states["game"] = Partie(4, 4, self)
+        else:
+            self.state.draw(self.window)
 
     def draw(self):
         self.state.draw(self.window)
