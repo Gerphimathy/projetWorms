@@ -19,7 +19,6 @@ class Partie:
         colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
         self.players = [Player(colors[_], w_p_player, self.game) for _ in range(players)]
 
-        self.turn = 0
         # Todo: Terrain size parameters and handle screen size being bigger than terrain size
         self.dimensions = (game.settings.width, game.settings.height)
         self.terrain = systems.terrain.generate_terrain(self.dimensions[0], self.dimensions[1], terrain_type)
@@ -28,6 +27,8 @@ class Partie:
 
         nb_worms = players * w_p_player
         parts = self.dimensions[0] // nb_worms
+        ''' TODO 
+        Place worms
         for k in range(nb_worms):
             player_index = k // w_p_player
             worm_index = k % w_p_player
@@ -54,28 +55,20 @@ class Partie:
                             self.players[player_index].worms[worm_index].x = x
                             self.players[player_index].worms[worm_index].y = y
                             break
+        '''
 
         self.top_left = (0, 0)
         self.draw()
 
+    def getNextPlayer(self):
+        while True:
+            for player in self.players:
+                if player.alive:
+                    yield player
+
     def events(self, event):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.game.state = "main_menu"
-
-        keys = pygame.key.get_pressed()
-        # Get 5 % of the dimensions of the window
-        if keys[pygame.K_LEFT]:
-            self.top_left = (self.top_left[0] - self.game.settings.width // 20, self.top_left[1])
-            self.draw()
-        if keys[pygame.K_RIGHT]:
-            self.top_left = (self.top_left[0] + self.game.settings.width // 20, self.top_left[1])
-            self.draw()
-        if keys[pygame.K_UP]:
-            self.top_left = (self.top_left[0], self.top_left[1] - self.game.settings.height // 20)
-            self.draw()
-        if keys[pygame.K_DOWN]:
-            self.top_left = (self.top_left[0], self.top_left[1] + self.game.settings.height // 20)
-            self.draw()
 
     def update(self):
         pass

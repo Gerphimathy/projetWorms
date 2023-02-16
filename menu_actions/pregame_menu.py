@@ -1,3 +1,6 @@
+from controllers.menu_option import LateralMenuOption
+
+
 def pregame_menu_options():
     # Each name, function pair will be attributed to a menu_option object
 
@@ -28,6 +31,11 @@ def pregame_menu_options():
                 self.menu.data['worms_per_player'] = 4
             if 'map_type' not in self.menu.data:
                 self.menu.data['map_type'] = 'bumpy'
+
+            # for each option in menu, check if lateral, and activate them all
+            for option in self.menu.options:
+                if isinstance(option, LateralMenuOption):
+                    option.action()
 
             self.menu.game.state = 'game'
 
