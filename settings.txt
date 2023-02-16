@@ -1,0 +1,5 @@
+width:1020:[800, 1020, 1280, 1600, 1920]
+height:720:[600, 720, 800, 900, 1080]
+fullscreen:False:[True,False]
+fps:60:[30, 60, 120]
+title:Worms ékip 10:["Worms ékip 10", "Worms ékip 10 - Fullscreen"]
