@@ -33,34 +33,18 @@ class Partie:
         self.draw()
 
     def placeWorms(self):
-        nb_worms = len(self.players) * self.worm_per_player
-        parts = self.dimensions[0] // nb_worms
-        for k in range(nb_worms):
-            player_index = k // self.worm_per_player
-            worm_index = k % self.worm_per_player
-            # If terrain type is flat, bumpy or mountain, place the worms at the top of the terrain
-            if self.terrain_type in ["flat", "bumpy", "mountainous", "extreme"]:
-                self.players[player_index].worms[worm_index].x = int(parts * (k + 0.5))
-                for y in range(self.dimensions[1]):
-                    if self.terrain[self.players[player_index].worms[worm_index].x][y] == 1:
-                        self.players[player_index].worms[worm_index].y = y - 1
-                        break
-
-            # if terrain type is cave,
-            # place the worms at a random x, with X y pair of coordinates,
-            # within a horizontal slice of the terrain
-            # within empty space and with ground below
-            elif self.terrain_type == "cave":
-                horizontal_slice = ((self.dimensions[0] // nb_worms) * k, (self.dimensions[0] // nb_worms) * (k + 1))
-                # Divide the vertical space into three parts
-                height_third = (k % 2) + 1
-                vertical_slice = (self.dimensions[1] // (height_third + 1), self.dimensions[1] // height_third)
-                for x in range(horizontal_slice[0], horizontal_slice[1]):
-                    for y in range(vertical_slice[0], vertical_slice[1]):
-                        if self.terrain[x][y] == 0 and self.terrain[x][y + 1] == 1:
-                            self.players[player_index].worms[worm_index].x = x
-                            self.players[player_index].worms[worm_index].y = y
+        for player in self.players:
+            for worm in player.worms:
+                while True:
+                    x = int(random() * (self.dimensions[0]-1))
+                    y = int(random() * (self.dimensions[1]-1))
+                    if self.terrain[x][y] == 0 and self.terrain[x][y+1] == 1 and self.isUnderWater(y):
+                        # if no worm is in a 5x5 square around the worm
+                        if not any([any([w.x - 2 < x < w.x + 2 and w.y - 2 < y < w.y + 2 for w in player.worms]) for player in self.players]):
+                            worm.x = x
+                            worm.y = y
                             break
+
 
     def getNextPlayer(self):
         while True:
