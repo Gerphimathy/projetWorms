@@ -21,19 +21,25 @@ class Partie:
 
         # Todo: Terrain size parameters and handle screen size being bigger than terrain size
         self.dimensions = (game.settings.width, game.settings.height)
+        self.terrain_type = terrain_type
+        self.worm_per_player = w_p_player
         self.terrain = systems.terrain.generate_terrain(self.dimensions[0], self.dimensions[1], terrain_type)
 
         self.water_level = 0.05
 
-        nb_worms = players * w_p_player
+        self.placeWorms()
+
+        self.top_left = (0, 0)
+        self.draw()
+
+    def placeWorms(self):
+        nb_worms = len(self.players) * self.worm_per_player
         parts = self.dimensions[0] // nb_worms
-        ''' TODO 
-        Place worms
         for k in range(nb_worms):
-            player_index = k // w_p_player
-            worm_index = k % w_p_player
+            player_index = k // self.worm_per_player
+            worm_index = k % self.worm_per_player
             # If terrain type is flat, bumpy or mountain, place the worms at the top of the terrain
-            if terrain_type in ["flat", "bumpy", "mountainous", "extreme"]:
+            if self.terrain_type in ["flat", "bumpy", "mountainous", "extreme"]:
                 self.players[player_index].worms[worm_index].x = int(parts * (k + 0.5))
                 for y in range(self.dimensions[1]):
                     if self.terrain[self.players[player_index].worms[worm_index].x][y] == 1:
@@ -44,7 +50,7 @@ class Partie:
             # place the worms at a random x, with X y pair of coordinates,
             # within a horizontal slice of the terrain
             # within empty space and with ground below
-            elif terrain_type == "cave":
+            elif self.terrain_type == "cave":
                 horizontal_slice = ((self.dimensions[0] // nb_worms) * k, (self.dimensions[0] // nb_worms) * (k + 1))
                 # Divide the vertical space into three parts
                 height_third = (k % 2) + 1
@@ -55,10 +61,6 @@ class Partie:
                             self.players[player_index].worms[worm_index].x = x
                             self.players[player_index].worms[worm_index].y = y
                             break
-        '''
-
-        self.top_left = (0, 0)
-        self.draw()
 
     def getNextPlayer(self):
         while True:
