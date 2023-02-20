@@ -34,8 +34,8 @@ class Settings:
             "title": "Worms ékip 10",
         }
         self.possibleValues = {
-            "width": [800, 1020, 1280, 1600, 1920],
-            "height": [600, 720, 800, 900, 1080],
+            "width": [800, 1020, 1280, 1600, 1920, 2560],
+            "height": [600, 720, 800, 900, 1080, 1440],
             "fullscreen": [True, False],
             "fps": [30, 60, 120],
             "title": ["Worms ékip 10", "Worms ékip 10 - Fullscreen"],
@@ -56,6 +56,8 @@ class Settings:
                 self.possibleValues[setting] = readPossibleValues(fcontent, setting)
                 if self.settings_types[setting] == int:
                     self.possibleValues[setting] = [int(x) for x in self.possibleValues[setting]]
+                elif self.settings_types[setting] == bool:
+                    self.possibleValues[setting] = [x == "True" for x in self.possibleValues[setting]]
         except FileNotFoundError:
             settings_file = open("settings.txt", "w")
             for setting in self.settings:

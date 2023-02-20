@@ -1,6 +1,6 @@
 import pygame
 
-from systems.settings import Settings
+from systems.settings import Settings, formatSetting, saveSettings
 
 
 def settings_options(game):
@@ -20,8 +20,20 @@ def settings_options(game):
 
         return inner
 
-    current_res = (game.settings.width, game.settings.height)
-    # 2 dimensional array: game.settings.possibleValues['width'], game.settings.possibleValues['height']
-    possible_res = [(width, height) for width in game.settings.possibleValues['width'] for height in game.settings.possibleValues['height']]
+    def fullscreen(self):
+        def inner():
+            value = self.get_current_value()
+            self.menu.game.settings.fullscreen = value
+            self.menu.game.window = pygame.display.set_mode(
+                (self.menu.game.settings.width, self.menu.game.settings.height), pygame.FULLSCREEN if value else 0)
 
-    return [('Retour', back, None), ('Résolution', resolution, "lateral", possible_res, current_res)]
+        return inner
+
+    return [('Retour', back, None),
+
+            ('Résolution', resolution, "lateral",
+            [(width, height) for width in game.settings.possibleValues['width'] for height in game.settings.possibleValues['height']],
+             (game.settings.width, game.settings.height)),
+
+            ('Plein écran', fullscreen, "lateral", game.settings.possibleValues['fullscreen'], game.settings.fullscreen),
+            ]
