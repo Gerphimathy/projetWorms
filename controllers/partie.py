@@ -15,8 +15,12 @@ class Partie:
 
         self.game = game
 
+        self.all_sprites = pygame.sprite.Group()
+        self.all_players_sprites = pygame.sprite.Group()
+
         colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
-        self.players = [Player(colors[_], w_p_player, self.game) for _ in range(players)]
+        self.players = [Player(colors[_], w_p_player, self.game, [self.all_sprites, self.all_players_sprites]) for _ in
+                        range(players)]
 
         self.dimensions = (game.settings.width, game.settings.height)
         self.terrain_type = terrain_type
@@ -36,6 +40,7 @@ class Partie:
         self.next_player_generator = self.getNextPlayer()
 
         self.next_turn()
+        self.update()
         self.draw()
 
     def placeWorms(self):
@@ -83,7 +88,7 @@ class Partie:
         # TODO: Pour l'instant, enter --> prochain tour
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
             self.next_turn()
-        # TODO: Pour le reste des actions, utilisez current_worm
+            # TODO: Pour le reste des actions, utilisez current_worm
 
         # TODO: DEBUG: Pour tester l'explosion, appuyez sur la touche "e"
         if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
@@ -93,8 +98,12 @@ class Partie:
             radius = input("radius: ")
             self.applyExplosion(int(x), int(y), int(radius))
 
+        self.current_worm.events(event)
+
     def update(self):
-        pass
+        for entity in self.all_players_sprites:
+            entity.update()
+        self.draw()
 
     def isUnderWater(self, y):
         return y < self.dimensions[1] - (self.dimensions[1] * self.water_level)
@@ -104,33 +113,28 @@ class Partie:
         height = self.game.settings.height
         self.game.window.fill((255, 255, 255))
 
-        # Draw the parts of the terrain that are visible
+        # Draw the parts of the terrain that are visible TODO : DECOMMENTER ICI / MODIFIER UNE FOIS MODIF TERRAIN EFFECTUE, PARCE QUE LÀ ÇA LAGUE SA RACE
 
-        if self.top_left[0] < 0:
-            self.top_left = (0, self.top_left[1])
-        if self.top_left[1] < 0:
-            self.top_left = (self.top_left[0], 0)
-        if self.top_left[0] + width > self.dimensions[0]:
-            self.top_left = (self.dimensions[0] - width, self.top_left[1])
-        if self.top_left[1] + height > self.dimensions[1]:
-            self.top_left = (self.top_left[0], self.dimensions[1] - height)
+        # if self.top_left[0] < 0:
+        #     self.top_left = (0, self.top_left[1])
+        # if self.top_left[1] < 0:
+        #     self.top_left = (self.top_left[0], 0)
+        # if self.top_left[0] + width > self.dimensions[0]:
+        #     self.top_left = (self.dimensions[0] - width, self.top_left[1])
+        # if self.top_left[1] + height > self.dimensions[1]:
+        #     self.top_left = (self.top_left[0], self.dimensions[1] - height)
+        #
+        # for x in range(width):
+        #     for y in range(height):
+        #         cell = self.terrain[x + self.top_left[0]][y + self.top_left[1]]
+        #         if self.isUnderWater(y + self.top_left[1]):
+        #             color = (255 * cell / 2, 255 * cell / 2, 255 * cell / 2)
+        #         else:
+        #             color = (0, 0, 255 * ((cell + 1) / 2))
+        #
+        #         self.game.window.set_at((x, y), color)
 
-        for x in range(width):
-            for y in range(height):
-                cell = self.terrain[x + self.top_left[0]][y + self.top_left[1]]
-                if self.isUnderWater(y + self.top_left[1]):
-                    color = (255 * cell / 2, 255 * cell / 2, 255 * cell / 2)
-                else:
-                    color = (0, 0, 255 * ((cell + 1) / 2))
+        pygame.draw.circle(self.game.window, (0, 0, 0), self.current_worm.pos, 20)
 
-                self.game.window.set_at((x, y), color)
-
-        for player in self.players:
-            for worm in player.worms:
-                if not worm.alive:
-                    continue
-                if worm.x < self.top_left[0] or worm.x > self.top_left[0] + self.game.settings.width:
-                    continue
-                if worm.y < self.top_left[1] or worm.y > self.top_left[1] + self.game.settings.height:
-                    continue
-                worm.draw()
+        for entity in self.all_sprites:
+            self.game.window.blit(entity.surf, entity.rect)

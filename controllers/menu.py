@@ -50,7 +50,6 @@ class Menu:
                 if self.selected.__class__.__name__ == 'LateralMenuOption':
                     self.selected.value = self.selected.value + 1
 
-            self.update()
 
     def update(self):
         if self.game.state != self:

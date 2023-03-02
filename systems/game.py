@@ -48,7 +48,7 @@ class Game:
         if value in self.states:
             previous_state = self.__state
             self.__state = value
-            self.update(previous_state)
+            self.update_state(previous_state)
         else:
             raise ValueError("Invalid state")
 
@@ -58,6 +58,8 @@ class Game:
         pygame.quit()
 
     def events(self):
+
+        # print(self.clock.get_fps())
         for event in pygame.event.get():
 
             # close events take priority
@@ -71,12 +73,17 @@ class Game:
             else:
                 self.state.events(event)
 
-    def update(self, previous_state):
+    def update_state(self, previous_state):
         if previous_state == "pregame_menu" and self.__state == "game":
             data = self.states[previous_state].data
             self.states["game"] = Partie(self, data["player_count"], data["worms_per_player"], data["map_type"])
         else:
             self.state.draw(self.window)
+
+    def update(self):
+        self.clock.tick(self.settings.fps)
+        self.events()
+        self.state.update()
 
     def draw(self):
         self.state.draw(self.window)

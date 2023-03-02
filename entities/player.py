@@ -1,10 +1,13 @@
+import pygame.sprite
+
 from entities.worm import Worm
 
 
 class Player:
-    def __init__(self, color, nb_worms, game):
+    def __init__(self, color, nb_worms, game, sprites_groups):
         self.color = color
-        self.worms = [Worm(0, 0, self) for _ in range(nb_worms)]
+        self.player_sprites = pygame.sprite.Group()
+        self.worms = [Worm(0, 0, self, sprites_groups) for _ in range(nb_worms)]
         self.alive = True
         self.game = game
         self.next_worm_generator = self.get_next_worm()
@@ -13,4 +16,7 @@ class Player:
         while True:
             for worm in self.worms:
                 if worm.alive:
+                    worm.active = True
                     yield worm
+                    worm.active = False
+

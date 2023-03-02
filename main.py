@@ -6,5 +6,5 @@ from systems.game import Game
 game = Game()
 
 while True:
-    game.events()
+    game.update()
     pygame.display.update()
