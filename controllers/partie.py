@@ -2,10 +2,13 @@ from random import random
 
 import pygame
 
+import entities.terrain
 import systems.terrain
 
 from entities.worm import Worm
 from entities.player import Player
+
+from entities.terrain import Terrain
 
 
 class Partie:
@@ -26,6 +29,15 @@ class Partie:
         self.terrain_type = terrain_type
         self.worm_per_player = w_p_player
         self.terrain = systems.terrain.generate_terrain(self.dimensions[0], self.dimensions[1], terrain_type)
+
+        # Generate sprite and surface based on terrain, ignore 0s in the array and only draw 1s
+        self.terrain_sprite = pygame.sprite.Group()
+        self.terrain_surface = pygame.Surface(self.dimensions)
+        for x in range(self.dimensions[0]):
+            for y in range(self.dimensions[1]):
+                if self.terrain[x][y] == 1:
+                    self.terrain_surface.set_at((x, y), (self.terrain[x][y]*255/2, self.terrain[x][y]*255/2, self.terrain[x][y]*255/2))
+                    self.terrain_sprite.add(entities.terrain.Terrain(x, y, self.terrain_surface))
 
         self.water_level = 0.05
 
@@ -68,12 +80,12 @@ class Partie:
     # Only applies explosion to the terrain
     # TODO: Apply explosion to worms + damage
     def applyExplosion(self, x, y, radius):
-        for i in range(-radius, radius + 1):
-            for j in range(-radius, radius + 1):
-                if i ** 2 + j ** 2 < radius ** 2:
-                    if 0 < x + i < self.dimensions[0] and 0 < y + j < self.dimensions[1]:
-                        self.terrain[x + i][y + j] = 0
-                        self.game.window.set_at((x + i, y + j), (0, 0, 0))
+        remove_keys = []
+        for sprite in self.terrain_sprite:
+            if sprite.inRadius(x, y, radius):
+                # Remove sprite from surface
+                self.terrain_surface.set_at((int(sprite.x), int(sprite.y)), (0, 0, 0))
+                sprite.kill()
 
     def getNextPlayer(self):
         while True:
@@ -102,13 +114,13 @@ class Partie:
 
     def update(self):
         for entity in self.all_players_sprites:
-            self.drawTerrainArea(entity.rect.x, entity.rect.y, entity.rect.width, entity.rect.height)
             entity.update()
-            self.game.window.blit(entity.surf, entity.rect)
+        self.draw()
 
     def isUnderWater(self, y):
         return y < self.dimensions[1] - (self.dimensions[1] * self.water_level)
 
+    '''
     def drawTerrainArea(self, _x, _y, width, height):
         # Draw terrain in specified area
         for x in range(_x, _x+width):
@@ -119,13 +131,12 @@ class Partie:
                 else:
                     color = (0, 0, 255 * ((cell + 1) / 2))
                 self.game.window.set_at((x, y), color)
+    '''
 
     def draw(self):
-        width = self.game.settings.width
-        height = self.game.settings.height
-        self.game.window.fill((255, 255, 255))
+        self.game.window.fill((0, 0, 0))
 
-        self.drawTerrainArea(0, 0, width, height)
+        self.game.window.blit(self.terrain_surface, (0, 0))
 
         for entity in self.all_sprites:
             self.game.window.blit(entity.surf, entity.rect)
