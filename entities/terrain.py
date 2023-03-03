@@ -8,6 +8,7 @@ class Terrain(pygame.sprite.Sprite):
         super().__init__()
         self.pos = vec(x, y)
         self.surf = terrain_surface
+        self.rect = self.surf.get_rect()
 
     def kill(self) -> None:
         super().kill()
