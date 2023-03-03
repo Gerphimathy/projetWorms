@@ -6,7 +6,8 @@ import noise
 import time
 
 import numpy as np
-#TODO : Tout modifier ici pour plutôt en faire des sprites et les mettre dans un groupe de sprites, ça facilitera beaucoup les collisions
+# TODO : Tout modifier ici pour plutôt en faire des sprites et les mettre dans un groupe de sprites, ça facilitera beaucoup les collisions
+# TODO --> Je m'ocuperais des collisions, je risque de souffrir mais je m'occuperai de ça - Mathis
 def generate_terrain(w, h, type="flat"):
     # generate  random noise array with 0,1 values
     # 0 = air

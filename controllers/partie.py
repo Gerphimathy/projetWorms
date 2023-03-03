@@ -102,39 +102,30 @@ class Partie:
 
     def update(self):
         for entity in self.all_players_sprites:
+            self.drawTerrainArea(entity.rect.x, entity.rect.y, entity.rect.width, entity.rect.height)
             entity.update()
-        self.draw()
+            self.game.window.blit(entity.surf, entity.rect)
 
     def isUnderWater(self, y):
         return y < self.dimensions[1] - (self.dimensions[1] * self.water_level)
+
+    def drawTerrainArea(self, _x, _y, width, height):
+        # Draw terrain in specified area
+        for x in range(_x, _x+width):
+            for y in range(_y, _y+height):
+                cell = self.terrain[x + self.top_left[0]][y + self.top_left[1]]
+                if self.isUnderWater(y + self.top_left[1]):
+                    color = (255 * cell / 2, 255 * cell / 2, 255 * cell / 2)
+                else:
+                    color = (0, 0, 255 * ((cell + 1) / 2))
+                self.game.window.set_at((x, y), color)
 
     def draw(self):
         width = self.game.settings.width
         height = self.game.settings.height
         self.game.window.fill((255, 255, 255))
 
-        # Draw the parts of the terrain that are visible TODO : DECOMMENTER ICI / MODIFIER UNE FOIS MODIF TERRAIN EFFECTUE, PARCE QUE LÀ ÇA LAGUE SA RACE
-
-        # if self.top_left[0] < 0:
-        #     self.top_left = (0, self.top_left[1])
-        # if self.top_left[1] < 0:
-        #     self.top_left = (self.top_left[0], 0)
-        # if self.top_left[0] + width > self.dimensions[0]:
-        #     self.top_left = (self.dimensions[0] - width, self.top_left[1])
-        # if self.top_left[1] + height > self.dimensions[1]:
-        #     self.top_left = (self.top_left[0], self.dimensions[1] - height)
-        #
-        # for x in range(width):
-        #     for y in range(height):
-        #         cell = self.terrain[x + self.top_left[0]][y + self.top_left[1]]
-        #         if self.isUnderWater(y + self.top_left[1]):
-        #             color = (255 * cell / 2, 255 * cell / 2, 255 * cell / 2)
-        #         else:
-        #             color = (0, 0, 255 * ((cell + 1) / 2))
-        #
-        #         self.game.window.set_at((x, y), color)
-
-        pygame.draw.circle(self.game.window, (0, 0, 0), self.current_worm.pos, 20)
+        self.drawTerrainArea(0, 0, width, height)
 
         for entity in self.all_sprites:
             self.game.window.blit(entity.surf, entity.rect)

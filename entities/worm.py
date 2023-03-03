@@ -69,7 +69,8 @@ class Worm(pygame.sprite.Sprite): #TODO : ptetr faire une class Kinematic Sprite
                     self.direction = Direction.RIGHT
             else:
                 self.direction = Direction.NONE
-            self.acc.x = ACC * self.direction.value  # TODO: Je sais pas où placer ça, dans le move ou dans l'event ?
+            self.acc.x = ACC * self.direction.value
+            # TODO: Je sais pas où placer ça, dans le move ou dans l'event ?
 
     def jump(self):
         print("jump")
@@ -77,10 +78,12 @@ class Worm(pygame.sprite.Sprite): #TODO : ptetr faire une class Kinematic Sprite
 
     # TODO : JUMP
 
-    def update(self): # TODO : Je sais pas si c'est ici mais ya un truc bizarre qui se passe, à fix
+    def update(self):
+        # TODO : Je sais pas si c'est ici mais ya un truc bizarre qui se passe, à fix
+        # TODO --> Réponse: FRIC est négatif et il y a  multiplication, du coup self.acc.x ondule - Mathis
         self.acc.x += self.vel.x * FRIC
+
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc
 
         self.rect.midbottom = self.pos
-        print(self.pos, self.vel, self.acc) # TODO : REMOVE
