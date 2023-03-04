@@ -33,6 +33,8 @@ class Partie:
         self.worm_per_player = w_p_player
 
         self.wind = vec(0, 0)
+        self.wind_angle = 0
+        self.__wind_arrow = False
 
         self.water_level = 0.05
 
@@ -194,9 +196,18 @@ class Partie:
                     yield player
 
     def change_wind(self):
+        self.__wind_arrow = True
         self.wind = vec(random() * 2 - 1, random() * 2 - 1).normalize() * random() * 10
-
-
+        self.wind_angle = self.calculateAngle((0,0), self.wind)
+        self.draw()
+        self.__wind_arrow = False
+    def rotate_point(self, point, pivot, angle):
+        x, y = point
+        px, py = pivot
+        angle = math.radians(angle)
+        qx = px + math.cos(angle) * (x - px) - math.sin(angle) * (y - py)
+        qy = py + math.sin(angle) * (x - px) + math.cos(angle) * (y - py)
+        return int(qx), int(qy)
     def events(self, event):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.game.state = "main_menu"
@@ -258,6 +269,18 @@ class Partie:
             # height//10 when force is max
             pygame.draw.circle(self.game.window, (255, 0, 0), (self.dimensions[0] // 2, self.dimensions[1] // 2),
                                int(self.__force_progress * self.dimensions[1] / 10 / self.__max_force), 1)
+        if self.__wind_arrow:
+            arrow_position = (self.game.settings.width - 100, 50)
+            arrow_points = [(0, 0), (0, -50), (200, 0), (0, 50)]
+            rotated_points = []
+            for point in arrow_points:
+                rotated_point = self.rotate_point(point, (0,0), self.wind_angle)
+                rotated_points.append((rotated_point[0] + arrow_position[0], rotated_point[1] + arrow_position[1]))
+            pygame.draw.polygon(self.game.window, (255, 0, 0), rotated_points)
+
+            # TODO: polygon test to remove later
+            pygame.draw.polygon(self.game.window, (255, 0, 0), [(50, 50), (200, 70), (400, 60), (120, 120)])
+
 
     def end_game(self):
         # TODO : END GAME, MENU ?
