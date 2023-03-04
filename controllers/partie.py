@@ -36,6 +36,8 @@ class Partie:
 
         self.water_level = 0.05
 
+        self.sound_explosion = pygame.mixer.Sound('assets/sounds/explosion.wav')
+
         # Generate sprite and surface based on terrain, ignore 0s in the array and only draw 1s
         self.terrain = systems.terrain.generate_terrain(self.dimensions[0], self.dimensions[1], terrain_type)
         self.terrain_sprite = pygame.sprite.Group()
@@ -96,7 +98,6 @@ class Partie:
         self.action_points = 60
 
     def applyExplosion(self, x, y, radius, damage=100):
-        # TODO : Add sound - Explosion
         for sprite in self.terrain_sprite:
             if sprite.inRadius(x, y, radius):
                 # Remove sprite from surface
@@ -120,6 +121,8 @@ class Partie:
                         self.calculateAngle((x, y), worm.pos),
                         20 * (1 - distance / radius)
                     )
+
+        self.sound_explosion.play()
 
     def enterCrosshair(self):
         self.__crosshair = True
@@ -184,6 +187,7 @@ class Partie:
 
     def change_wind(self):
         self.wind = vec(random() * 2 - 1, random() * 2 - 1).normalize() * random() * 10
+
 
     def events(self, event):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
