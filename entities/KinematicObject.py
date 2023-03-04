@@ -123,7 +123,9 @@ class KinematicObject(pygame.sprite.Sprite):
             elif int(self.y) > height:
                 self.y = height
 
-        if self.terrain[int(self.x)][int(self.y)] == 1:
+        if self.terrain[int(self.x)][int(self.y)] == 1 or \
+                self.pos.x <= 0 or self.pos.x >= self.partie.dimensions[0]-1 or \
+                self.pos.y <= 0 or self.pos.y >= self.partie.dimensions[1]-1:
             self.processCollision(old_pos)
         else:
             self.processNoCollision()

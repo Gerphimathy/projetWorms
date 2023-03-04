@@ -164,6 +164,8 @@ class Partie:
 
     def calculateAngle(self, origin, target):
         base_vec = (1, 0)
+        if origin[1] < target[1]:
+            base_vec = (-1, 0)
         target_vec = (target[0] - origin[0], target[1] - origin[1])
         try:
             angle = math.acos((base_vec[0] * target_vec[0] + base_vec[1] * target_vec[1]) / (

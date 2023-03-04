@@ -13,7 +13,7 @@ MIN_RADIUS = 30
 class Rocket(KinematicObject):
     def __init__(self, x, y, partie, worm, angle, force, parameters: dict = {}):
         super().__init__(x, y, partie.terrain, partie.terrain_sprite, partie,
-                         grav_modifier=0.03, wind_modifier=1, fric_modifier=-0.03)
+                         grav_modifier=0.03, wind_modifier=0.03, fric_modifier=-0.03)
         self.pos = vec(x, y)
 
         self.partie = partie
