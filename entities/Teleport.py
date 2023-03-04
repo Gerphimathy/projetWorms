@@ -1,4 +1,3 @@
-from enum import Enum
 import random
 
 import pygame
@@ -11,9 +10,10 @@ MAX_RADIUS = 100
 MIN_RADIUS = 30
 
 
-class Grenade(KinematicObject):
+class Teleport(KinematicObject):
     def __init__(self, x, y, partie, worm, angle, force, parameters: dict = {}):
-        super().__init__(x, y, partie.terrain, partie.terrain_sprite, partie, wind_modifier=0, fric_modifier=-0.02)
+        super().__init__(x, y, partie.terrain, partie.terrain_sprite, partie,
+                         grav_modifier=0.02, wind_modifier=0, fric_modifier=-0.02)
         self.pos = vec(x, y)
 
         self.partie = partie
@@ -22,12 +22,10 @@ class Grenade(KinematicObject):
 
         self.force = force
         self.angle = angle
-        self.time = parameters['time'] * self.partie.game.settings.fps
-        print(f"Grenade - Time: {self.time} Force: {self.force} Angle: {self.angle}")
-        # Create a surface at x, y, fill it with a red circle and add it to all_sprites after blitting it
+        print(f"Teleport - Force: {self.force} Angle: {self.angle}")
 
         self.surf = pygame.Surface((5, 5))
-        self.surf.fill((255, 0, 0))
+        self.surf.fill((0, 255, 255))
         self.rect = self.surf.get_rect()
         self.rect.center = (x, y)
         self.partie.all_sprites.add(self)
@@ -41,12 +39,10 @@ class Grenade(KinematicObject):
 
         self.rect.midbottom = self.pos
 
-        self.time -= 1
-
-        if self.time <= 0:
-            self.kill()
-            radius = random.randint(MIN_RADIUS, MAX_RADIUS)
-            self.partie.applyExplosion(int(self.x), int(self.y), radius)
-            self.worm.dependants.remove(self)
-            self.partie.all_sprites.remove(self)
-            self.partie.next_turn()
+    def processCollision(self, old_pos):
+        self.kill()
+        self.worm.pos = self.pos
+        self.worm.vel = vec(0, 0)
+        self.worm.dependants.remove(self)
+        self.partie.all_sprites.remove(self)
+        self.partie.next_turn()

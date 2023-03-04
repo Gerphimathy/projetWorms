@@ -8,6 +8,7 @@ from typing import Generic, TypeVar
 from entities.KinematicObject import KinematicObject
 from entities.Grenade import Grenade
 from entities.Rocket import Rocket
+from entities.Teleport import Teleport
 
 vec = pygame.math.Vector2
 
@@ -45,6 +46,7 @@ class Worm(KinematicObject):
         self.alive = True
         self.hp = hp_p_worm
         self.grounded = False
+        self.canAttack = False
 
         self.surf = pygame.Surface((WIDTH, HEIGHT))
         self.surf.fill(self.player.color)
@@ -72,17 +74,19 @@ class Worm(KinematicObject):
                         self.weapon = self.partie.game.states["weapons_menu"].data["weapon"]
                         self.partie.game.states["weapons_menu"].data["weapon"] = ""
                         # Switch on weapon
-                        if "grenade" in self.weapon:
-                            if not any(isinstance(d, Grenade) for d in self.dependants):
+                        if self.canAttack:
+                            if "grenade" in self.weapon:
                                 time = self.weapon.split(" ")[1]
                                 time = int(time.split("s")[0])
                                 parameters = {'time': time}
                                 self.throw_weapon(Grenade, parameters=parameters)
-                        if "rocket" in self.weapon:
-                            if not any(isinstance(d, Rocket) for d in self.dependants):
+                            if "rocket" in self.weapon:
                                 self.throw_weapon(Rocket)
-                        if "vest" in self.weapon:
-                            self.s_vest()
+                            if "vest" in self.weapon:
+                                self.s_vest()
+                            if "teleport" in self.weapon:
+                                self.throw_weapon(Teleport)
+                            self.canAttack = False
 
                 if event.key == pygame.K_q:
                     self.left = True
@@ -181,16 +185,17 @@ class Worm(KinematicObject):
             self.active = False
 
     def update(self):
-        if self.left or self.right:
-            if self.grounded:
-                airborn_modifier = 1
-                if self.terrain[int(self.x)][int(self.y)] != 1:
-                    self.y -= 1
-            else:
-                airborn_modifier = 0.2
-            self.addVelocityVector(vec(
-                self.direction_modifier * VITESSE * airborn_modifier, -VITESSE * 0.3 * airborn_modifier
-            ))
+        if self.active:
+            if self.left or self.right:
+                if self.grounded:
+                    airborn_modifier = 1
+                    if not self.collides():
+                        self.y -= 1
+                else:
+                    airborn_modifier = 0.2
+                self.addVelocityVector(vec(
+                    self.direction_modifier * VITESSE * airborn_modifier, -VITESSE * 0.3 * airborn_modifier
+                ))
 
         super().update()
         self.rect.midbottom = self.pos

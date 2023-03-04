@@ -88,10 +88,17 @@ class Partie:
                             break
 
     def next_turn(self):
+        if self.current_worm:
+            self.current_worm.active = False
+            (self.current_worm.left, self.current_worm.right) = (False, False)
+            self.current_worm.direction_modifier = 0
+
         self.change_wind()
-        print(self.wind)  # TODO : Debug, removeq
+        print(self.wind)  # TODO : Debug, remove
         self.current_player = next(self.next_player_generator)
         self.current_worm = next(self.current_player.next_worm_generator)
+        self.current_worm.active = True
+        self.current_worm.canAttack = True
         # TODO: Balancer les points d'action (genre les déplacements, tout ça)
         self.action_points = 60
 
