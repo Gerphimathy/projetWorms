@@ -22,8 +22,6 @@ class Rocket(KinematicObject):
 
         self.force = force
         self.angle = angle
-        print(f"Rocket - Force: {self.force} Angle: {self.angle}")
-        # Create a surface at x, y, fill it with a red circle and add it to all_sprites after blitting it
 
         self.surf = pygame.Surface((5, 5))
         self.surf.fill((255, 0, 255))
@@ -46,3 +44,4 @@ class Rocket(KinematicObject):
         self.partie.applyExplosion(int(self.x), int(self.y), radius)
         self.worm.dependants.remove(self)
         self.partie.all_sprites.remove(self)
+        self.partie.next_turn()

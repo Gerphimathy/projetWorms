@@ -8,6 +8,7 @@ from typing import Generic, TypeVar
 from entities.KinematicObject import KinematicObject
 from entities.Grenade import Grenade
 from entities.Rocket import Rocket
+from entities.Teleport import Teleport
 
 vec = pygame.math.Vector2
 
@@ -15,7 +16,7 @@ WIDTH = 5
 HEIGHT = 15
 
 VITESSE = 2.5
-FORCE_DE_SAUT = 10
+FORCE_DE_SAUT = 15
 
 MIN_S_RADIUS = 30
 MAX_S_RADIUS = 100
@@ -45,6 +46,7 @@ class Worm(KinematicObject):
         self.alive = True
         self.hp = hp_p_worm
         self.grounded = False
+        self.canAttack = False
 
         self.surf = pygame.Surface((WIDTH, HEIGHT))
         self.surf.fill(self.player.color)
@@ -61,37 +63,36 @@ class Worm(KinematicObject):
     def events(self, event):
         if self.active:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_z:
+                if event.key == pygame.K_z or event.key == pygame.K_SPACE:
                     # TODO : Add sound : jump
                     self.jump()
-                if event.key == pygame.K_SPACE:
-                    # if key exists in dict
-                    if "weapon" not in self.partie.game.states["weapons_menu"].data.keys() or self.partie.game.states["weapons_menu"].data["weapon"] == "":
-                        self.partie.game.state = "weapons_menu"
-                    else:
-                        self.weapon = self.partie.game.states["weapons_menu"].data["weapon"]
-                        self.partie.game.states["weapons_menu"].data["weapon"] = ""
-                        # Switch on weapon
-                        if "grenade" in self.weapon:
-                            if not any(isinstance(d, Grenade) for d in self.dependants):
-                                time = self.weapon.split(" ")[1]
-                                time = int(time.split("s")[0])
-                                parameters = {'time': time}
-                                self.throw_weapon(Grenade, parameters=parameters)
-                        if "rocket" in self.weapon:
-                            if not any(isinstance(d, Rocket) for d in self.dependants):
-                                self.throw_weapon(Rocket)
-                        if "vest" in self.weapon:
-                            self.s_vest()
-
                 if event.key == pygame.K_q:
                     self.left = True
                 if event.key == pygame.K_d:
                     self.right = True
 
-            # right click to open weapons menu
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                self.partie.game.state = "weapons_menu"
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 3:
+                    self.partie.game.state = "weapons_menu"
+                if event.button == 1:
+                    # if key exists in dict
+                    if "weapon" in self.partie.game.states["weapons_menu"].data.keys() and self.partie.game.states["weapons_menu"].data["weapon"] != "":
+                        self.weapon = self.partie.game.states["weapons_menu"].data["weapon"]
+                        self.partie.game.states["weapons_menu"].data["weapon"] = ""
+                        # Switch on weapon
+                        if self.canAttack:
+                            if "grenade" in self.weapon:
+                                time = self.weapon.split(" ")[1]
+                                time = int(time.split("s")[0])
+                                parameters = {'time': time}
+                                self.throw_weapon(Grenade, parameters=parameters)
+                            if "rocket" in self.weapon:
+                                self.throw_weapon(Rocket)
+                            if "vest" in self.weapon:
+                                self.s_vest()
+                            if "teleport" in self.weapon:
+                                self.throw_weapon(Teleport)
+                            self.canAttack = False
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_q:
@@ -163,7 +164,9 @@ class Worm(KinematicObject):
 
     def jump(self):
         if self.grounded:
-            self.addVelocityVector(vec(self.direction_modifier * FORCE_DE_SAUT, -FORCE_DE_SAUT))
+            self.addVelocityVector(
+                vec(self.direction_modifier * FORCE_DE_SAUT, -FORCE_DE_SAUT).normalize() * FORCE_DE_SAUT
+            )
             self.grounded = False
 
     def kill(self) -> None:
@@ -174,19 +177,25 @@ class Worm(KinematicObject):
         self.partie.all_sprites.remove(self)
         self.player.player_sprites.remove(self)
         self.player.worms.remove(self)
+        for d in self.dependants:
+            d.kill()
         if self.active:
             self.partie.next_turn()
             self.active = False
 
     def update(self):
-        if self.left or self.right:
-            airborn_modifier = 1
-            if not self.grounded:
-                airborn_modifier = 0.2
-            self.addVelocityVector(vec(
-                self.direction_modifier * VITESSE * airborn_modifier, -VITESSE * 0.3 * airborn_modifier
-            ))
-            #self.y -= 1
+        if self.active:
+            if self.left or self.right:
+                if self.grounded:
+                    airborn_modifier = 1
+                    if not self.collides():
+                        self.y -= 1
+                else:
+                    airborn_modifier = 0.2
+                self.addVelocityVector(vec(
+                    self.direction_modifier * VITESSE * airborn_modifier, -VITESSE * 0.3 * airborn_modifier
+                ))
+
         super().update()
         self.rect.midbottom = self.pos
 
