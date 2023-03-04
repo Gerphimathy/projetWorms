@@ -14,8 +14,8 @@ vec = pygame.math.Vector2
 WIDTH = 5
 HEIGHT = 15
 
-VITESSE = 4
-FORCE_DE_SAUT = 15
+VITESSE = 2.5
+FORCE_DE_SAUT = 10
 
 MIN_S_RADIUS = 30
 MAX_S_RADIUS = 100
@@ -29,20 +29,17 @@ MAX_FORCE = 50
 W = TypeVar('W', bound=KinematicObject)
 
 
-class Direction(Enum):
-    LEFT = -1
-    NONE = 0
-    RIGHT = 1
-
-
 class Worm(KinematicObject):
 
     def __init__(self, x, y, player, sprites_groups, partie, hp_p_worm=100):
-        super().__init__(x, y, partie.terrain, partie.terrain_sprite, partie, wind_modifier=0)
+        super().__init__(x, y, partie.terrain, partie.terrain_sprite, partie,
+                         wind_modifier=0, ground_fric_modifier=-0.7, fric_modifier=-0.1, grav_modifier=0.1)
 
         self.partie = partie
         self.player = player
-        self.direction = Direction.NONE
+        self.left = False
+        self.right = False
+        self.direction_modifier = 0
         self.length = 1
         self.body = (x, y)
         self.alive = True
@@ -67,7 +64,7 @@ class Worm(KinematicObject):
                     self.jump()
                 if event.key == pygame.K_g:
                     if not any(isinstance(d, Grenade) for d in self.dependants):
-                        parameters = {'time' : random.randint(MIN_TIME, MAX_TIME)}
+                        parameters = {'time': random.randint(MIN_TIME, MAX_TIME)}
                         self.throw_weapon(Grenade, parameters=parameters)
                 if event.key == pygame.K_s:
                     self.s_vest()
@@ -75,18 +72,18 @@ class Worm(KinematicObject):
                     if not any(isinstance(d, Rocket) for d in self.dependants):
                         self.throw_weapon(Rocket)
 
-            pressed_keys = pygame.key.get_pressed()
+                if event.key == pygame.K_q:
+                    self.left = True
+                if event.key == pygame.K_d:
+                    self.right = True
 
-            if self.grounded:
-                if pressed_keys[pygame.K_q] or pressed_keys[pygame.K_d]:
-                    if pressed_keys[pygame.K_q]:
-                        self.direction = Direction.LEFT
-                    else:
-                        self.direction = Direction.RIGHT
-                else:
-                    self.direction = Direction.NONE
-                if self.direction != Direction.NONE:
-                    self.addVelocityVector(vec(self.direction.value * VITESSE, 0))
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_q:
+                    self.left = False
+                if event.key == pygame.K_d:
+                    self.right = False
+
+            self.direction_modifier = -int(self.left) + int(self.right)
 
         # def throw_grenade(self):
         #     target = self.partie.enterCrosshair()
@@ -127,7 +124,6 @@ class Worm(KinematicObject):
     def throw_weapon(self, W, parameters: list = []):
         target = self.partie.enterCrosshair()
         angle = self.partie.calculateAngle(self.pos, target)
-        time = random.randint(MIN_TIME, MAX_TIME)
         force = self.partie.enterForceMode(MAX_FORCE)
 
         if force > 30:
@@ -140,7 +136,7 @@ class Worm(KinematicObject):
         if angle < 0:
             angle = 0
 
-        self.dependants.append(W(self.x, self.y-HEIGHT, self.partie, self, angle, force, parameters))
+        self.dependants.append(W(self.x, self.y - HEIGHT, self.partie, self, angle, force, parameters))
 
     def s_vest(self):
         self.partie.applyExplosion(int(self.x), int(self.y), random.randint(MIN_S_RADIUS, MAX_S_RADIUS))
@@ -149,7 +145,7 @@ class Worm(KinematicObject):
 
     def jump(self):
         if self.grounded:
-            self.addVelocityAngle(90, FORCE_DE_SAUT)
+            self.addVelocityVector(vec(self.direction_modifier * FORCE_DE_SAUT, -FORCE_DE_SAUT))
             self.grounded = False
 
     def kill(self) -> None:
@@ -158,11 +154,20 @@ class Worm(KinematicObject):
         self.player.player_sprites.remove(self)
         self.partie.all_sprites.remove(self)
         self.player.player_sprites.remove(self)
+        self.player.worms.remove(self)
         if self.active:
             self.partie.next_turn()
             self.active = False
 
     def update(self):
+        if self.left or self.right:
+            airborn_modifier = 1
+            if not self.grounded:
+                airborn_modifier = 0.2
+            self.addVelocityVector(vec(
+                self.direction_modifier * VITESSE * airborn_modifier, -VITESSE * 0.3 * airborn_modifier
+            ))
+            #self.y -= 1
         super().update()
         self.rect.midbottom = self.pos
 
@@ -181,3 +186,6 @@ class Worm(KinematicObject):
     def processCollision(self, old_pos):
         super().processCollision(old_pos)
         self.grounded = True
+
+    def processNoCollision(self):
+        self.grounded = False

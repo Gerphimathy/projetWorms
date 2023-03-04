@@ -7,7 +7,8 @@ vec = pygame.math.Vector2
 
 class KinematicObject(pygame.sprite.Sprite):
     def __init__(self, x, y, terrain, terrain_sprite_group, partie,
-                 grav_modifier=0.1, wind_modifier=0.1, fric_modifier=-0.06, ground_fric_modifier=-0.7, bounce_modifier=0.3):
+                 grav_modifier=0.1, wind_modifier=0.1, fric_modifier=-0.06, ground_fric_modifier=-0.3,
+                 bounce_modifier=0.3):
         super().__init__()
         self.pos = vec(x, y)
         self.vel = vec(0, 0)
@@ -66,9 +67,10 @@ class KinematicObject(pygame.sprite.Sprite):
         adjacents = {}
         for _x in range(-4, 4):
             for _y in range(-4, 4):
-                if x + _x < 0 or x + _x >= self.partie.dimensions[0] or y + _y < 0 or y + _y >= self.partie.dimensions[1]:
-                    continue
-                adjacents[(x + _x, y + _y)] = self.terrain[x + _x][y + _y]
+                if not \
+                        (x + _x < 0 or x + _x >= self.partie.dimensions[0] or
+                         y + _y < 0 or y + _y >= self.partie.dimensions[1]):
+                    adjacents[(x + _x, y + _y)] = self.terrain[x + _x][y + _y]
 
         # remove 0 values
         for values in adjacents.copy():
@@ -98,9 +100,6 @@ class KinematicObject(pygame.sprite.Sprite):
         self.vel += self.partie.wind * self.wind_modifier
         self.vel += self.vel * self.fric_modifier
 
-        if self.terrain[int(self.x)][int(self.y)] == 1:
-            self.processCollision(old_pos)
-
         self.x += self.vel.x
         self.y += self.vel.y
 
@@ -119,6 +118,11 @@ class KinematicObject(pygame.sprite.Sprite):
             elif int(self.y) > height:
                 self.y = height
 
+        if self.terrain[int(self.x)][int(self.y)] == 1:
+            self.processCollision(old_pos)
+        else:
+            self.processNoCollision()
+
     def processCollision(self, old_pos):
         # if colliding bellow with terrain, undo y movement and place on ground level
         # if self.terrain[int(self.x)][int(self.y)] == 1:
@@ -128,11 +132,18 @@ class KinematicObject(pygame.sprite.Sprite):
         #             #self.vel = vec(0, 0)
         #             break
         #
-        # if self.terrain[int(self.x)][int(self.y)] == 1:
-        #     self.x = old_pos.x
+
+        normal = self.getCollisionSurface().rotate(90)
+        self.pos = old_pos
         #     #self.vel = vec(0, 0)
         self.addVelocityVector(self.vel * self.ground_fric_modifier)
-        self.bounce()
+        self.bounce(normal)
 
     def bounce(self, normal: vec = vec(0, -1)):
-        self.addVelocityVector(normal * self.vel.length() * (1+self.bounce_modifier))
+        if normal.length() > 0 and self.vel != vec(0, 0):
+            self.addVelocityVector((self.vel.reflect(normal) - self.vel).normalize() * self.vel.length())
+        else:
+            self.setVelocityVector(-self.vel)
+
+    def processNoCollision(self):
+        pass

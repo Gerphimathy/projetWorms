@@ -243,3 +243,7 @@ class Partie:
             # height//10 when force is max
             pygame.draw.circle(self.game.window, (255, 0, 0), (self.dimensions[0] // 2, self.dimensions[1] // 2),
                                int(self.__force_progress * self.dimensions[1] / 10 / self.__max_force), 1)
+
+    def end_game(self):
+        # TODO : END GAME, MENU ?
+        pass

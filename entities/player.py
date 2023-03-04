@@ -18,6 +18,7 @@ class Player:
             for worm in self.worms:
                 if worm.alive:
                     worm.active = True
+                    (worm.left, worm.right) = (False, False)
                     yield worm
                     worm.active = False
 
