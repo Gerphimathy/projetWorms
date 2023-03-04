@@ -52,12 +52,42 @@ class KinematicObject(pygame.sprite.Sprite):
             -force * math.sin(angle)
         )
 
-    def addVelocityVector(self, vector : vec):
+    def addVelocityVector(self, vector: vec):
         self.vel += vector
 
-    def collidesWith(self, all_terrain_sprites):
-        # all_terrain_sprites is a pygame.sprite.Group
-        return pygame.sprite.spritecollide(self, all_terrain_sprites, False)
+    def getCollisionSurface(self):
+        x = int(self.x)
+        y = int(self.y)
+        # produce a vector of the surface of the terrain the object is colliding with
+
+        # get adjacent tiles
+        adjacents = {}
+        for _x in range(-4, 4):
+            for _y in range(-4, 4):
+                if x + _x < 0 or x + _x >= self.partie.dimensions[0] or y + _y < 0 or y + _y >= self.partie.dimensions[1]:
+                    continue
+                adjacents[(x + _x, y + _y)] = self.terrain[x + _x][y + _y]
+
+        # remove 0 values
+        for values in adjacents.copy():
+            if adjacents[values] == 0:
+                del adjacents[values]
+
+        adjacents = list(adjacents.keys())
+
+        # Remove non surface tiles (have 4 adjacent tiles)
+        for tile in adjacents.copy():
+            if self.terrain[tile[0] + 1][tile[1]] != 0 and \
+                    self.terrain[tile[0] - 1][tile[1]] != 0 and \
+                    self.terrain[tile[0]][tile[1] + 1] != 0 and \
+                    self.terrain[tile[0]][tile[1] - 1] != 0:
+                adjacents.remove(tile)
+
+        # Draw a vector from the first tile to the last
+        if len(adjacents) > 1:
+            return vec(vec(adjacents[-1]) - vec(adjacents[0]))
+        else:
+            return vec(0, 0)
 
     def update(self):
         old_pos = self.pos
