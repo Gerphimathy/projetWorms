@@ -13,6 +13,8 @@ from entities.player import Player
 
 from entities.terrain import Terrain
 
+vec = pygame.math.Vector2
+
 
 class Partie:
     def __init__(self, game, players, w_p_player, terrain_type):
@@ -21,12 +23,16 @@ class Partie:
 
         self.game = game
 
+        self.GRAVITY = vec(0, 9)  # Positive gravity because the y-axis goes toward the ground
+
         self.all_sprites = pygame.sprite.Group()
         self.all_players_sprites = pygame.sprite.Group()
 
         self.dimensions = (game.settings.width, game.settings.height)
         self.terrain_type = terrain_type
         self.worm_per_player = w_p_player
+
+        self.wind = vec(0, 0)
 
         self.water_level = 0.05
 
@@ -82,12 +88,15 @@ class Partie:
                             break
 
     def next_turn(self):
+        self.change_wind()
+        print(self.wind) #TODO : Debug, removeq
         self.current_player = next(self.next_player_generator)
         self.current_worm = next(self.current_player.next_worm_generator)
         # TODO: Balancer les points d'action (genre les déplacements, tout ça)
         self.action_points = 60
 
-    def applyExplosion(self, x, y, radius):
+
+    def applyExplosion(self, x, y, radius, damage=100):
         for sprite in self.terrain_sprite:
             if sprite.inRadius(x, y, radius):
                 # Remove sprite from surface
@@ -106,8 +115,12 @@ class Partie:
                 if worm.inRadius(x, y, radius):
                     epi_to_worm_vec = (worm.x - x, worm.y - y)
                     distance = math.sqrt(epi_to_worm_vec[0] ** 2 + epi_to_worm_vec[1] ** 2)
-                    worm.hp -= 100 * (1 - distance / radius)
-                    worm.addForce(0, 0, self.calculateAngle((x, y), worm.pos), 20 * (1 - distance / radius), self.game.settings.fps)
+                    worm.hp -= damage * (1 - distance / radius)
+                    worm.setVelocityAngle(
+                        self.calculateAngle((x, y), worm.pos),
+                        20 * (1 - distance / radius)
+                    )
+
 
     def enterCrosshair(self):
         self.__crosshair = True
@@ -123,9 +136,9 @@ class Partie:
         self.draw()
         return self.crosshair_target
 
-    def enterForceMode(self, max):
+    def enterForceMode(self, max_power):
         self.__forceMode = True
-        self.__max_force = max
+        self.__max_force = max_power
         self.__force_progress = 0
 
         direction = 1 / (self.game.settings.fps / 3)
@@ -144,7 +157,7 @@ class Partie:
             self.draw()
             pygame.display.update()
             self.__force_progress += direction
-            if self.__force_progress >= max or self.__force_progress <= 0:
+            if self.__force_progress >= max_power or self.__force_progress <= 0:
                 direction *= -1
             if not pygame.mouse.get_pressed()[0]:
                 self.__forceMode = False
@@ -166,6 +179,9 @@ class Partie:
             for player in self.players:
                 if player.alive:
                     yield player
+
+    def change_wind(self):
+        self.wind = vec(random()*2-1, random()*2-1).normalize() * random() * 10
 
     def events(self, event):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:

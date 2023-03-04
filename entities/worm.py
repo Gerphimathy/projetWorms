@@ -31,7 +31,7 @@ class Direction(Enum):
 class Worm(KinematicObject):
 
     def __init__(self, x, y, player, sprites_groups, partie, hp_p_worm=100):
-        super().__init__(x, y, partie.terrain, partie.terrain_sprite)
+        super().__init__(x, y, partie.terrain, partie.terrain_sprite, partie, wind_modifier=0)
 
         self.partie = partie
         self.player = player
@@ -68,7 +68,7 @@ class Worm(KinematicObject):
             else:
                 self.direction = Direction.NONE
             if self.direction != Direction.NONE:
-                self.addForce(self.x, self.y, 0, self.direction.value * VITESSE, self.player.game.settings.fps)
+                self.addVelocityVector(vec(self.direction.value * VITESSE,0))
 
             if pressed_keys[pygame.K_g]:
                 if not any(isinstance(d, Grenade) for d in self.dependants):
@@ -102,7 +102,7 @@ class Worm(KinematicObject):
         self.partie.next_turn()
 
     def jump(self):
-        self.addForce(self.x, self.y, 90, FORCE_DE_SAUT, self.player.game.settings.fps)
+        self.addVelocityAngle(90, FORCE_DE_SAUT)
 
     def kill(self) -> None:
         super().kill()

@@ -4,18 +4,19 @@ import pygame
 
 vec = pygame.math.Vector2
 
-ACC = 0.5
-FRIC = 0.12
-GRAV = -9
-
 
 class KinematicObject(pygame.sprite.Sprite):
-    def __init__(self, x, y, terrain, terrain_sprite_group):
+    def __init__(self, x, y, terrain, terrain_sprite_group, partie,
+                 grav_modifier=0.1, wind_modifier=0.1, fric_modifier=-0.06):
         super().__init__()
         self.pos = vec(x, y)
+        self.vel = vec(0, 0)
         self.terrain = terrain
         self.terrain_sprite_group = terrain_sprite_group
-        self.forces = []
+        self.partie = partie
+        self.grav_modifier = grav_modifier  # Can be understood as weight of the object
+        self.wind_modifier = wind_modifier
+        self.fric_modifier = fric_modifier
 
     def _get_x(self):
         return self.pos.x
@@ -32,25 +33,27 @@ class KinematicObject(pygame.sprite.Sprite):
     x = property(_get_x, _set_x)
     y = property(_get_y, _set_y)
 
-    def addForce(self, x0, y0, angle, force, refresh_rate):
+    def setVelocityAngle(self, angle, force):
         angle = math.radians(angle)
 
-        def inner():
-            t = 0.0
-            # angle is provided in degrees, but we need radians
-            while True:
-                # TODO: Calculs avec frottements
-                yield vec(
-                    # V0*cos(a)
-                    force * math.cos(angle),
+        self.vel = vec(
+            force * math.cos(angle),
+            -force * math.sin(angle)
+        )
 
-                    # Grav*t²/2 + V0*sin(a)*t
-                    # Inverted because pygame's y-axis is inverted
-                    -force * math.sin(angle) - (GRAV * t)
-                )
-                t += 1 / (refresh_rate // 10)
+    def setVelocityVector(self, vector: vec):
+        self.vel = vector
 
-        self.forces.append(inner())
+    def addVelocityAngle(self, angle, force):
+        angle = math.radians(angle)
+
+        self.vel += vec(
+            force * math.cos(angle),
+            -force * math.sin(angle)
+        )
+
+    def addVelocityVector(self, vector : vec):
+        self.vel += vector
 
     def collidesWith(self, all_terrain_sprites):
         # all_terrain_sprites is a pygame.sprite.Group
@@ -58,10 +61,13 @@ class KinematicObject(pygame.sprite.Sprite):
 
     def update(self):
         old_pos = self.pos
-        for force in self.forces:
-            velocity = next(force)
-            self.x += velocity.x
-            self.y += velocity.y
+
+        self.vel += self.partie.GRAVITY * self.grav_modifier
+        self.vel += self.partie.wind * self.wind_modifier
+        self.vel += self.vel * self.fric_modifier
+
+        self.x += self.vel.x
+        self.y += self.vel.y
 
         height = len(self.terrain[0]) - 1
         width = len(self.terrain) - 1
@@ -83,10 +89,9 @@ class KinematicObject(pygame.sprite.Sprite):
             for y in range(int(old_pos.y), int(self.pos.y)):
                 if self.terrain[int(self.x)][y] == 1:
                     self.pos = vec(self.x, y - 1)
-                    self.forces = []
+                    self.vel = vec(0, 0)
                     break
 
         if self.terrain[int(self.x)][int(self.y)] == 1:
             self.x = old_pos.x
-            self.forces = []
-
+            self.vel = vec(0, 0)

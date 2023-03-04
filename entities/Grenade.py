@@ -13,12 +13,12 @@ MIN_RADIUS = 30
 
 class Grenade(KinematicObject):
     def __init__(self, x, y, partie, worm, angle, force, time):
-        super().__init__(x, y, partie.terrain, partie.terrain_sprite)
+        super().__init__(x, y, partie.terrain, partie.terrain_sprite, partie)
         self.pos = vec(x, y)
 
         self.partie = partie
         self.worm = worm
-        self.addForce(x, y, angle, force, self.partie.game.settings.fps)
+        self.setVelocityAngle(angle, force)
 
         self.force = force
         self.angle = angle
@@ -34,10 +34,10 @@ class Grenade(KinematicObject):
 
     def update(self):
         super().update()
-        if not self.forces:
+        if self.vel == (0, 0):
             # Rebond
             self.force *= 0.5
-            self.addForce(self.x, self.y, self.angle, self.force, self.partie.game.settings.fps)
+            self.setVelocityAngle(self.angle, self.force)
 
         self.rect.midbottom = self.pos
 
