@@ -22,7 +22,6 @@ class Rocket(KinematicObject):
 
         self.force = force
         self.angle = angle
-        print(f"Rocket - Force: {self.force} Angle: {self.angle}")
 
         self.surf = pygame.Surface((5, 5))
         self.surf.fill((255, 0, 255))

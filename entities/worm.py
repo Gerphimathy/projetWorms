@@ -63,14 +63,20 @@ class Worm(KinematicObject):
     def events(self, event):
         if self.active:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_z:
+                if event.key == pygame.K_z or event.key == pygame.K_SPACE:
                     # TODO : Add sound : jump
                     self.jump()
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_q:
+                    self.left = True
+                if event.key == pygame.K_d:
+                    self.right = True
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 3:
+                    self.partie.game.state = "weapons_menu"
+                if event.button == 1:
                     # if key exists in dict
-                    if "weapon" not in self.partie.game.states["weapons_menu"].data.keys() or self.partie.game.states["weapons_menu"].data["weapon"] == "":
-                        self.partie.game.state = "weapons_menu"
-                    else:
+                    if "weapon" in self.partie.game.states["weapons_menu"].data.keys() and self.partie.game.states["weapons_menu"].data["weapon"] != "":
                         self.weapon = self.partie.game.states["weapons_menu"].data["weapon"]
                         self.partie.game.states["weapons_menu"].data["weapon"] = ""
                         # Switch on weapon
@@ -87,15 +93,6 @@ class Worm(KinematicObject):
                             if "teleport" in self.weapon:
                                 self.throw_weapon(Teleport)
                             self.canAttack = False
-
-                if event.key == pygame.K_q:
-                    self.left = True
-                if event.key == pygame.K_d:
-                    self.right = True
-
-            # right click to open weapons menu
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                self.partie.game.state = "weapons_menu"
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_q:
@@ -180,6 +177,8 @@ class Worm(KinematicObject):
         self.partie.all_sprites.remove(self)
         self.player.player_sprites.remove(self)
         self.player.worms.remove(self)
+        for d in self.dependants:
+            d.kill()
         if self.active:
             self.partie.next_turn()
             self.active = False

@@ -94,7 +94,6 @@ class Partie:
             self.current_worm.direction_modifier = 0
 
         self.change_wind()
-        print(self.wind)  # TODO : Debug, remove
         self.current_player = next(self.next_player_generator)
         self.current_worm = next(self.current_player.next_worm_generator)
         self.current_worm.active = True
@@ -129,6 +128,7 @@ class Partie:
                     )
 
     def enterCrosshair(self):
+        pygame.event.clear()
         self.__crosshair = True
         selected = False
         while not selected:
@@ -143,6 +143,7 @@ class Partie:
         return self.crosshair_target
 
     def enterForceMode(self, max_power):
+        pygame.event.clear()
         self.__forceMode = True
         self.__max_force = max_power
         self.__force_progress = 0

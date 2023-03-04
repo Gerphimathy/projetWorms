@@ -22,7 +22,6 @@ class Teleport(KinematicObject):
 
         self.force = force
         self.angle = angle
-        print(f"Teleport - Force: {self.force} Angle: {self.angle}")
 
         self.surf = pygame.Surface((5, 5))
         self.surf.fill((0, 255, 255))

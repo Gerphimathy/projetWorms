@@ -23,7 +23,6 @@ class Grenade(KinematicObject):
         self.force = force
         self.angle = angle
         self.time = parameters['time'] * self.partie.game.settings.fps
-        print(f"Grenade - Time: {self.time} Force: {self.force} Angle: {self.angle}")
         # Create a surface at x, y, fill it with a red circle and add it to all_sprites after blitting it
 
         self.surf = pygame.Surface((5, 5))
