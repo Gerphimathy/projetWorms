@@ -62,6 +62,7 @@ class Worm(KinematicObject):
         if self.active:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_z:
+                    # TODO : Add sound : jump
                     self.jump()
                 if event.key == pygame.K_SPACE:
                     # if key exists in dict
@@ -141,6 +142,8 @@ class Worm(KinematicObject):
         angle = self.partie.calculateAngle(self.pos, target)
         force = self.partie.enterForceMode(MAX_FORCE)
 
+        # TODO : Add sound - TIR
+
         if force > 30:
             force = 30
         if force < 0:
@@ -164,6 +167,7 @@ class Worm(KinematicObject):
             self.grounded = False
 
     def kill(self) -> None:
+        # TODO : Add sound : death
         super().kill()
         self.alive = False
         self.player.player_sprites.remove(self)
@@ -191,6 +195,7 @@ class Worm(KinematicObject):
 
         if self.partie.isUnderWater(self.y):
             self.hp = 0
+            # TODO : Add sound - Goutte
 
         if self.hp <= 0:
             self.kill()

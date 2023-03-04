@@ -96,6 +96,7 @@ class Partie:
         self.action_points = 60
 
     def applyExplosion(self, x, y, radius, damage=100):
+        # TODO : Add sound - Explosion
         for sprite in self.terrain_sprite:
             if sprite.inRadius(x, y, radius):
                 # Remove sprite from surface
