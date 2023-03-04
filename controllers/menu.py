@@ -37,19 +37,18 @@ class Menu:
         if self.game.state != self:
             return
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_z:
                 self.selected = self.__selected - 1
-            elif event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_s:
                 self.selected = self.__selected + 1
-            elif event.key == pygame.K_RETURN:
+            elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                 self.selected.action()
-            elif event.key == pygame.K_LEFT:
+            elif event.key == pygame.K_q:
                 if self.selected.__class__.__name__ == 'LateralMenuOption':
                     self.selected.value = self.selected.value - 1
-            elif event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_d:
                 if self.selected.__class__.__name__ == 'LateralMenuOption':
                     self.selected.value = self.selected.value + 1
-
 
     def update(self):
         if self.game.state != self:
