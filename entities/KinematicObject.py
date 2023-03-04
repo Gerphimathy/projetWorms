@@ -81,6 +81,11 @@ class KinematicObject(pygame.sprite.Sprite):
 
         # Remove non surface tiles (have 4 adjacent tiles)
         for tile in adjacents.copy():
+            # Ig at the limit of the map remove
+            if tile[0] == 0 or tile[0] == self.partie.dimensions[0] - 1 or \
+                    tile[1] == 0 or tile[1] == self.partie.dimensions[1] - 1:
+                adjacents.remove(tile)
+                continue
             if self.terrain[tile[0] + 1][tile[1]] != 0 and \
                     self.terrain[tile[0] - 1][tile[1]] != 0 and \
                     self.terrain[tile[0]][tile[1] + 1] != 0 and \
