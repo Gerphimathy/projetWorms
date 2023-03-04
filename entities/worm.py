@@ -60,11 +60,14 @@ class Worm(KinematicObject):
         self.dependants = []
         self.weapon = ""
 
+        self.sound_goutte = pygame.mixer.Sound('assets/sounds/water_death.wav')
+        self.sound_grenade_launcher = pygame.mixer.Sound('assets/sounds/grenade_launcher.wav')
+        self.sound_cartoon_jump = pygame.mixer.Sound('assets/sounds/cartoon_jump.wav')
+
     def events(self, event):
         if self.active:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_z or event.key == pygame.K_SPACE:
-                    # TODO : Add sound : jump
                     self.jump()
                 if event.key == pygame.K_q:
                     self.left = True
@@ -143,7 +146,7 @@ class Worm(KinematicObject):
         angle = self.partie.calculateAngle(self.pos, target)
         force = self.partie.enterForceMode(MAX_FORCE)
 
-        # TODO : Add sound - TIR
+        self.sound_grenade_launcher.play()
 
         if force > 30:
             force = 30
@@ -164,6 +167,7 @@ class Worm(KinematicObject):
 
     def jump(self):
         if self.grounded:
+            self.sound_cartoon_jump.play()
             self.addVelocityVector(
                 vec(self.direction_modifier * FORCE_DE_SAUT, -FORCE_DE_SAUT).normalize() * FORCE_DE_SAUT
             )
@@ -204,7 +208,7 @@ class Worm(KinematicObject):
 
         if self.partie.isUnderWater(self.y):
             self.hp = 0
-            # TODO : Add sound - Goutte
+            self.sound_goutte.play()
 
         if self.hp <= 0:
             self.kill()

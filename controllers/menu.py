@@ -5,6 +5,7 @@ from controllers.menu_option import MenuOption, LateralMenuOption
 
 class Menu:
     def __init__(self, name, game, options=None, style=None):
+        self.sound_menu_select = pygame.mixer.Sound('assets/sounds/menu_select.wav')
         self.data = {}
         self.texts = []
         self.name = name
@@ -38,8 +39,10 @@ class Menu:
             return
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_z:
+                self.sound_menu_select.play()
                 self.selected = self.__selected - 1
             elif event.key == pygame.K_s:
+                self.sound_menu_select.play()
                 self.selected = self.__selected + 1
             elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                 self.selected.action()
