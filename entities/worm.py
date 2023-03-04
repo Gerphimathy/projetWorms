@@ -180,13 +180,16 @@ class Worm(KinematicObject):
 
     def update(self):
         if self.left or self.right:
-            airborn_modifier = 1
-            if not self.grounded:
+            if self.grounded:
+                airborn_modifier = 1
+                if self.terrain[int(self.x)][int(self.y)] != 1:
+                    self.y -= 1
+            else:
                 airborn_modifier = 0.2
             self.addVelocityVector(vec(
                 self.direction_modifier * VITESSE * airborn_modifier, -VITESSE * 0.3 * airborn_modifier
             ))
-            #self.y -= 1
+
         super().update()
         self.rect.midbottom = self.pos
 
