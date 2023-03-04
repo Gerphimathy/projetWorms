@@ -56,26 +56,41 @@ class Worm(KinematicObject):
 
         self.active = False
         self.dependants = []
+        self.weapon = ""
 
     def events(self, event):
         if self.active:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_z:
                     self.jump()
-                if event.key == pygame.K_g:
-                    if not any(isinstance(d, Grenade) for d in self.dependants):
-                        parameters = {'time': random.randint(MIN_TIME, MAX_TIME)}
-                        self.throw_weapon(Grenade, parameters=parameters)
-                if event.key == pygame.K_s:
-                    self.s_vest()
-                if event.key == pygame.K_r:
-                    if not any(isinstance(d, Rocket) for d in self.dependants):
-                        self.throw_weapon(Rocket)
+                if event.key == pygame.K_SPACE:
+                    # if key exists in dict
+                    if "weapon" not in self.partie.game.states["weapons_menu"].data.keys() or self.partie.game.states["weapons_menu"].data["weapon"] == "":
+                        self.partie.game.state = "weapons_menu"
+                    else:
+                        self.weapon = self.partie.game.states["weapons_menu"].data["weapon"]
+                        self.partie.game.states["weapons_menu"].data["weapon"] = ""
+                        # Switch on weapon
+                        if "grenade" in self.weapon:
+                            if not any(isinstance(d, Grenade) for d in self.dependants):
+                                time = self.weapon.split(" ")[1]
+                                time = int(time.split("s")[0])
+                                parameters = {'time': time}
+                                self.throw_weapon(Grenade, parameters=parameters)
+                        if "rocket" in self.weapon:
+                            if not any(isinstance(d, Rocket) for d in self.dependants):
+                                self.throw_weapon(Rocket)
+                        if "vest" in self.weapon:
+                            self.s_vest()
 
                 if event.key == pygame.K_q:
                     self.left = True
                 if event.key == pygame.K_d:
                     self.right = True
+
+            # right click to open weapons menu
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                self.partie.game.state = "weapons_menu"
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_q:

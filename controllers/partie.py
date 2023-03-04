@@ -216,7 +216,7 @@ class Partie:
                 self.game.window.set_at((x, y), color)
     '''
 
-    def draw(self):
+    def draw(self, window=None):
         self.game.window.fill((0, 0, 0))
 
         self.game.window.blit(self.terrain_surface, (0, 0))

@@ -14,6 +14,8 @@ from menu_actions.settings_menu import settings_options
 
 from menu_actions.pregame_menu import pregame_menu_options
 
+from menu_actions.weapons_menu import weapons_options
+
 
 class Game:
     def __init__(self):
@@ -34,7 +36,7 @@ class Game:
             "main_menu": Menu("Menu Principal", self, main_menu_options(), default_menu_style()),
             "pregame_menu": Menu("Préparation de la partie", self, pregame_menu_options(), default_menu_style()),
             "game": Partie(None, 0, 0, "flat"),
-            "pause_menu": None,
+            "weapons_menu": Menu("Armes", self, weapons_options(), default_menu_style()),
             "settings_menu": Menu("Options", self, settings_options(self), default_menu_style()),
         }
         self.__state = "main_menu"
