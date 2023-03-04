@@ -15,7 +15,7 @@ WIDTH = 5
 HEIGHT = 15
 
 VITESSE = 2.5
-FORCE_DE_SAUT = 10
+FORCE_DE_SAUT = 15
 
 MIN_S_RADIUS = 30
 MAX_S_RADIUS = 100
@@ -163,7 +163,9 @@ class Worm(KinematicObject):
 
     def jump(self):
         if self.grounded:
-            self.addVelocityVector(vec(self.direction_modifier * FORCE_DE_SAUT, -FORCE_DE_SAUT))
+            self.addVelocityVector(
+                vec(self.direction_modifier * FORCE_DE_SAUT, -FORCE_DE_SAUT).normalize() * FORCE_DE_SAUT
+            )
             self.grounded = False
 
     def kill(self) -> None:
