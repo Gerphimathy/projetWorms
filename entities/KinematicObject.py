@@ -7,7 +7,7 @@ vec = pygame.math.Vector2
 
 class KinematicObject(pygame.sprite.Sprite):
     def __init__(self, x, y, terrain, terrain_sprite_group, partie,
-                 grav_modifier=0.1, wind_modifier=0.1, fric_modifier=-0.06):
+                 grav_modifier=0.1, wind_modifier=0.1, fric_modifier=-0.06, ground_fric_modifier=-0.7, bounce_modifier=0.3):
         super().__init__()
         self.pos = vec(x, y)
         self.vel = vec(0, 0)
@@ -17,6 +17,8 @@ class KinematicObject(pygame.sprite.Sprite):
         self.grav_modifier = grav_modifier  # Can be understood as weight of the object
         self.wind_modifier = wind_modifier
         self.fric_modifier = fric_modifier
+        self.ground_fric_modifier = ground_fric_modifier
+        self.bounce_modifier = bounce_modifier
 
     def _get_x(self):
         return self.pos.x
@@ -52,7 +54,7 @@ class KinematicObject(pygame.sprite.Sprite):
             -force * math.sin(angle)
         )
 
-    def addVelocityVector(self, vector : vec):
+    def addVelocityVector(self, vector: vec):
         self.vel += vector
 
     def collidesWith(self, all_terrain_sprites):
@@ -65,6 +67,9 @@ class KinematicObject(pygame.sprite.Sprite):
         self.vel += self.partie.GRAVITY * self.grav_modifier
         self.vel += self.partie.wind * self.wind_modifier
         self.vel += self.vel * self.fric_modifier
+
+        if self.terrain[int(self.x)][int(self.y)] == 1:
+            self.processCollision(old_pos)
 
         self.x += self.vel.x
         self.y += self.vel.y
@@ -84,14 +89,20 @@ class KinematicObject(pygame.sprite.Sprite):
             elif int(self.y) > height:
                 self.y = height
 
+    def processCollision(self, old_pos):
         # if colliding bellow with terrain, undo y movement and place on ground level
-        if self.terrain[int(self.x)][int(self.y)] == 1:
-            for y in range(int(old_pos.y), int(self.pos.y)):
-                if self.terrain[int(self.x)][y] == 1:
-                    self.pos = vec(self.x, y - 1)
-                    self.vel = vec(0, 0)
-                    break
+        # if self.terrain[int(self.x)][int(self.y)] == 1:
+        #     for y in range(int(old_pos.y), int(self.pos.y)):
+        #         if self.terrain[int(self.x)][y] == 1:
+        #             self.pos = vec(self.x, y - 1)
+        #             #self.vel = vec(0, 0)
+        #             break
+        #
+        # if self.terrain[int(self.x)][int(self.y)] == 1:
+        #     self.x = old_pos.x
+        #     #self.vel = vec(0, 0)
+        self.addVelocityVector(self.vel * self.ground_fric_modifier)
+        self.bounce()
 
-        if self.terrain[int(self.x)][int(self.y)] == 1:
-            self.x = old_pos.x
-            self.vel = vec(0, 0)
+    def bounce(self, normal: vec = vec(0, -1)):
+        self.addVelocityVector(normal * self.vel.length() * (1+self.bounce_modifier))

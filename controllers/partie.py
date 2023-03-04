@@ -59,7 +59,7 @@ class Partie:
         self.current_worm = None
         self.action_points = 0
 
-        self.next_player_generator = self.getNextPlayer()
+        self.next_player_generator = self.get_next_player()
 
         self.__crosshair = False
         self.crosshair_target = (0, 0)
@@ -89,12 +89,11 @@ class Partie:
 
     def next_turn(self):
         self.change_wind()
-        print(self.wind) #TODO : Debug, removeq
+        print(self.wind)  # TODO : Debug, removeq
         self.current_player = next(self.next_player_generator)
         self.current_worm = next(self.current_player.next_worm_generator)
         # TODO: Balancer les points d'action (genre les déplacements, tout ça)
         self.action_points = 60
-
 
     def applyExplosion(self, x, y, radius, damage=100):
         for sprite in self.terrain_sprite:
@@ -120,7 +119,6 @@ class Partie:
                         self.calculateAngle((x, y), worm.pos),
                         20 * (1 - distance / radius)
                     )
-
 
     def enterCrosshair(self):
         self.__crosshair = True
@@ -169,19 +167,20 @@ class Partie:
         target_vec = (target[0] - origin[0], target[1] - origin[1])
         try:
             angle = math.acos((base_vec[0] * target_vec[0] + base_vec[1] * target_vec[1]) / (
-                    math.sqrt(base_vec[0] ** 2 + base_vec[1] ** 2) * math.sqrt(target_vec[0] ** 2 + target_vec[1] ** 2)))
+                    math.sqrt(base_vec[0] ** 2 + base_vec[1] ** 2) * math.sqrt(
+                target_vec[0] ** 2 + target_vec[1] ** 2)))
         except ZeroDivisionError:
             angle = 90
         return math.degrees(angle)
 
-    def getNextPlayer(self):
+    def get_next_player(self):
         while True:
             for player in self.players:
                 if player.alive:
                     yield player
 
     def change_wind(self):
-        self.wind = vec(random()*2-1, random()*2-1).normalize() * random() * 10
+        self.wind = vec(random() * 2 - 1, random() * 2 - 1).normalize() * random() * 10
 
     def events(self, event):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -193,8 +192,10 @@ class Partie:
         self.current_worm.events(event)
 
     def update(self):
-        for entity in self.all_players_sprites:
-            entity.update()
+        if len(self.players) < 2:
+            self.end_game()  #TODO : add endgame function and fix last worm problem
+        for player in self.players:
+            player.update()
         self.draw()
 
     def isUnderWater(self, y):

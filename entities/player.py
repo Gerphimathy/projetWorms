@@ -21,3 +21,10 @@ class Player:
                     yield worm
                     worm.active = False
 
+    def update(self):
+        if len(self.worms) < 1:
+            self.alive = False
+            self.partie.players.remove(self)
+        else:
+            for worm in self.worms:
+                worm.update()
