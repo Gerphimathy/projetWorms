@@ -43,6 +43,10 @@ class Worm(KinematicObject):
         self.body = (x, y)
         self.alive = True
         self.hp = hp_p_worm
+        self.max_hp = hp_p_worm
+
+        self.height = HEIGHT
+
         self.grounded = False
         self.canAttack = False
 

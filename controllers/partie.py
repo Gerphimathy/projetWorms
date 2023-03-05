@@ -254,7 +254,12 @@ class Partie:
             for worm in player.worms:
                 if worm.active:
                     pygame.draw.circle(self.game.window, (255, 255, 255), (worm.x, worm.y), 10, 1)
-                    break
+                if worm.alive:
+                    max_hp = worm.max_hp
+                    hp = worm.hp
+                    worm_height = worm.height
+                    pygame.draw.rect(self.game.window, (255, 0, 0), (worm.x - 10, worm.y - worm_height - 10, 20, 3))
+                    pygame.draw.rect(self.game.window, (0, 255, 0), (worm.x - 10, worm.y - worm_height - 10, 20 * hp / max_hp, 3))
 
         if self.__crosshair:
             pygame.draw.circle(self.game.window, (255, 0, 0), self.crosshair_target, 10, 1)
