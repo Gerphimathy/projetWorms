@@ -5,3 +5,10 @@
 - PHILIPPON Mathis
 - SI AHMED HADDI Yanis
 - VANDEVOORDE Tanguy
+
+
+# Dépendences
+
+- Pygame
+- Noise
+- Numpy
