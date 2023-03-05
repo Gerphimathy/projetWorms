@@ -80,7 +80,6 @@ class Partie:
         self.__force_progress = 0
 
         self.next_turn()
-        self.draw()
         self.update()
 
     def placeWorms(self):
@@ -107,8 +106,9 @@ class Partie:
         self.change_wind()
         self.current_player = next(self.next_player_generator)
         self.current_worm = next(self.current_player.next_worm_generator)
-        self.current_worm.active = True
-        self.current_worm.canAttack = True
+        if self.current_worm is not None:
+            self.current_worm.active = True
+            self.current_worm.canAttack = True
 
     def applyExplosion(self, x, y, radius, damage=100):
         for sprite in self.terrain_sprite:
@@ -218,13 +218,14 @@ class Partie:
         # TODO: Afficher les touches pour les actions
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
             self.next_turn()
-        self.current_worm.events(event)
+        if self.current_worm is not None:
+            self.current_worm.events(event)
 
     def update(self):
-        if len(self.players) < 2:
-            self.end_game()
         for player in self.players:
             player.update()
+        if len(self.players) < 2:
+            self.end_game()
         self.draw()
 
     def isUnderWater(self, y):

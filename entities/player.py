@@ -16,9 +16,12 @@ class Player:
 
     def get_next_worm(self):
         while True:
-            for worm in self.worms:
-                if worm.alive:
-                    yield worm
+            if len(self.worms) == 0 or not self.alive:
+                yield None
+            else:
+                for worm in self.worms:
+                    if worm.alive:
+                        yield worm
 
     def update(self):
         if len(self.worms) < 1:
