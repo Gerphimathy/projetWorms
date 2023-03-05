@@ -56,7 +56,8 @@ class Game:
 
     state = property(__get_state, __set_state)
 
-    def close(self):
+    @staticmethod
+    def close():
         pygame.quit()
 
     def events(self):

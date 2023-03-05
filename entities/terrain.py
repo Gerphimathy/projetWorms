@@ -15,10 +15,8 @@ class Terrain(pygame.sprite.Sprite):
         # Place a black pixel at self pos
         self.surf = None
         self.pos = None
-        self.vel = None
-        self.acc = None
 
-    def inRadius(self, x, y, radius):
+    def in_radius(self, x, y, radius):
         return (self.pos.x - x) ** 2 + (self.pos.y - y) ** 2 <= radius ** 2
 
     def _get_x(self):

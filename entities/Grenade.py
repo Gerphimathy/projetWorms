@@ -1,4 +1,3 @@
-from enum import Enum
 import random
 
 import pygame
@@ -12,13 +11,15 @@ MIN_RADIUS = 30
 
 
 class Grenade(KinematicObject):
-    def __init__(self, x, y, partie, worm, angle, force, parameters: dict = {}):
+    def __init__(self, x, y, partie, worm, angle, force, parameters=None):
         super().__init__(x, y, partie.terrain, partie.terrain_sprite, partie, wind_modifier=0, fric_modifier=-0.02)
+        if parameters is None:
+            parameters = {}
         self.pos = vec(x, y)
 
         self.partie = partie
         self.worm = worm
-        self.setVelocityAngle(angle, force)
+        self.set_velocity_angle(angle, force)
 
         self.force = force
         self.angle = angle
@@ -45,7 +46,7 @@ class Grenade(KinematicObject):
         if self.time <= 0:
             self.kill()
             radius = random.randint(MIN_RADIUS, MAX_RADIUS)
-            self.partie.applyExplosion(int(self.x), int(self.y), radius)
+            self.partie.apply_explosion(int(self.x), int(self.y), radius)
             self.worm.dependants.remove(self)
             self.partie.all_sprites.remove(self)
             self.partie.next_turn()

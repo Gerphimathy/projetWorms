@@ -20,6 +20,7 @@ class LateralMenuOption(MenuOption):
 
     def get_current_value(self):
         return self.__current_value
+
     def __get_value(self):
         return self.__value
 
@@ -32,4 +33,3 @@ class LateralMenuOption(MenuOption):
         self.__current_value = self.possible_values[self.__value]
 
     value = property(__get_value, __set_value)
-

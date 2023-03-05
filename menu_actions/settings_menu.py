@@ -1,7 +1,5 @@
 import pygame
 
-from systems.settings import Settings, formatSetting, saveSettings
-
 
 def settings_options(game):
     def back(self):
@@ -32,8 +30,10 @@ def settings_options(game):
     return [('Retour', back, None),
 
             ('Résolution', resolution, "lateral",
-            [(width, height) for width in game.settings.possibleValues['width'] for height in game.settings.possibleValues['height']],
+            [(width, height) for width in game.settings.possibleValues['width']
+             for height in game.settings.possibleValues['height']],
              (game.settings.width, game.settings.height)),
 
-            ('Plein écran', fullscreen, "lateral", game.settings.possibleValues['fullscreen'], game.settings.fullscreen),
+            ('Plein écran', fullscreen, "lateral",
+             game.settings.possibleValues['fullscreen'], game.settings.fullscreen),
             ]

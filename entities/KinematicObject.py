@@ -36,7 +36,7 @@ class KinematicObject(pygame.sprite.Sprite):
     x = property(_get_x, _set_x)
     y = property(_get_y, _set_y)
 
-    def setVelocityAngle(self, angle, force):
+    def set_velocity_angle(self, angle, force):
         angle = math.radians(angle)
 
         self.vel = vec(
@@ -44,10 +44,10 @@ class KinematicObject(pygame.sprite.Sprite):
             -force * math.sin(angle)
         )
 
-    def setVelocityVector(self, vector: vec):
+    def set_velocity_vector(self, vector: vec):
         self.vel = vector
 
-    def addVelocityAngle(self, angle, force):
+    def add_velocity_angle(self, angle, force):
         angle = math.radians(angle)
 
         self.vel += vec(
@@ -55,46 +55,46 @@ class KinematicObject(pygame.sprite.Sprite):
             -force * math.sin(angle)
         )
 
-    def addVelocityVector(self, vector: vec):
+    def add_velocity_vector(self, vector: vec):
         self.vel += vector
 
-    def getCollisionSurface(self):
+    def get_collision_surface(self):
         x = int(self.x)
         y = int(self.y)
         # produce a vector of the surface of the terrain the object is colliding with
 
         # get adjacent tiles
-        adjacents = {}
+        adjacent = {}
         for _x in range(-4, 4):
             for _y in range(-4, 4):
                 if not \
                         (x + _x < 0 or x + _x >= self.partie.dimensions[0] or
                          y + _y < 0 or y + _y >= self.partie.dimensions[1]):
-                    adjacents[(x + _x, y + _y)] = self.terrain[x + _x][y + _y]
+                    adjacent[(x + _x, y + _y)] = self.terrain[x + _x][y + _y]
 
         # remove 0 values
-        for values in adjacents.copy():
-            if adjacents[values] == 0:
-                del adjacents[values]
+        for values in adjacent.copy():
+            if adjacent[values] == 0:
+                del adjacent[values]
 
-        adjacents = list(adjacents.keys())
+        adjacent = list(adjacent.keys())
 
         # Remove non surface tiles (have 4 adjacent tiles)
-        for tile in adjacents.copy():
+        for tile in adjacent.copy():
             # Ig at the limit of the map remove
             if tile[0] == 0 or tile[0] == self.partie.dimensions[0] - 1 or \
                     tile[1] == 0 or tile[1] == self.partie.dimensions[1] - 1:
-                adjacents.remove(tile)
+                adjacent.remove(tile)
                 continue
             if self.terrain[tile[0] + 1][tile[1]] != 0 and \
                     self.terrain[tile[0] - 1][tile[1]] != 0 and \
                     self.terrain[tile[0]][tile[1] + 1] != 0 and \
                     self.terrain[tile[0]][tile[1] - 1] != 0:
-                adjacents.remove(tile)
+                adjacent.remove(tile)
 
         # Draw a vector from the first tile to the last
-        if len(adjacents) > 1:
-            return vec(vec(adjacents[-1]) - vec(adjacents[0]))
+        if len(adjacent) > 1:
+            return vec(vec(adjacent[-1]) - vec(adjacent[0]))
         else:
             return vec(0, 0)
 
@@ -131,31 +131,21 @@ class KinematicObject(pygame.sprite.Sprite):
                 self.y = height
 
         if self.collides():
-            self.processCollision(old_pos)
+            self.process_collision(old_pos)
         else:
-            self.processNoCollision()
+            self.process_no_collision()
 
-    def processCollision(self, old_pos):
-        # if colliding bellow with terrain, undo y movement and place on ground level
-        # if self.terrain[int(self.x)][int(self.y)] == 1:
-        #     for y in range(int(old_pos.y), int(self.pos.y)):
-        #         if self.terrain[int(self.x)][y] == 1:
-        #             self.pos = vec(self.x, y - 1)
-        #             #self.vel = vec(0, 0)
-        #             break
-        #
-
-        normal = self.getCollisionSurface().rotate(90)
+    def process_collision(self, old_pos):
+        normal = self.get_collision_surface().rotate(90)
         self.pos = old_pos
-        #     #self.vel = vec(0, 0)
-        self.addVelocityVector(self.vel * self.ground_fric_modifier)
+        self.add_velocity_vector(self.vel * self.ground_fric_modifier)
         self.bounce(normal)
 
     def bounce(self, normal: vec = vec(0, -1)):
         if normal.length() > 0 and self.vel != vec(0, 0):
-            self.addVelocityVector((self.vel.reflect(normal) - self.vel).normalize() * self.vel.length())
+            self.add_velocity_vector((self.vel.reflect(normal) - self.vel).normalize() * self.vel.length())
         else:
-            self.setVelocityVector(-self.vel)
+            self.set_velocity_vector(-self.vel)
 
-    def processNoCollision(self):
+    def process_no_collision(self):
         pass

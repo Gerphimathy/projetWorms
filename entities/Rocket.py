@@ -18,7 +18,7 @@ class Rocket(KinematicObject):
 
         self.partie = partie
         self.worm = worm
-        self.setVelocityAngle(angle, force)
+        self.set_velocity_angle(angle, force)
 
         self.force = force
         self.angle = angle
@@ -31,17 +31,12 @@ class Rocket(KinematicObject):
 
     def update(self):
         super().update()
-        # if self.vel == (0, 0):
-        #     # Rebond
-        #     self.force *= 0.5
-        #     self.setVelocityAngle(self.angle, self.force)
-
         self.rect.midbottom = self.pos
 
-    def processCollision(self, old_pos):
+    def process_collision(self, old_pos):
         self.kill()
         radius = random.randint(MIN_RADIUS, MAX_RADIUS)
-        self.partie.applyExplosion(int(self.x), int(self.y), radius)
+        self.partie.apply_explosion(int(self.x), int(self.y), radius)
         self.worm.dependants.remove(self)
         self.partie.all_sprites.remove(self)
         self.partie.next_turn()

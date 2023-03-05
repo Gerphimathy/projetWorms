@@ -1,5 +1,3 @@
-import random
-
 import pygame
 
 from entities.KinematicObject import KinematicObject
@@ -18,7 +16,7 @@ class Teleport(KinematicObject):
 
         self.partie = partie
         self.worm = worm
-        self.setVelocityAngle(angle, force)
+        self.set_velocity_angle(angle, force)
 
         self.force = force
         self.angle = angle
@@ -38,7 +36,7 @@ class Teleport(KinematicObject):
 
         self.rect.midbottom = self.pos
 
-    def processCollision(self, old_pos):
+    def process_collision(self, old_pos):
         self.kill()
         self.worm.pos = self.pos
         self.worm.vel = vec(0, 0)

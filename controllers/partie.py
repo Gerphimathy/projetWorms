@@ -9,10 +9,8 @@ import systems.terrain
 
 import time
 
-from entities.worm import Worm
 from entities.player import Player
 
-from entities.terrain import Terrain
 from menu_actions.menu_style import default_menu_style
 
 vec = pygame.math.Vector2
@@ -60,7 +58,7 @@ class Partie:
 
         self.n_b_players = players
 
-        self.placeWorms()
+        self.place_worms()
 
         self.top_left = (0, 0)
 
@@ -82,13 +80,13 @@ class Partie:
         self.next_turn()
         self.update()
 
-    def placeWorms(self):
+    def place_worms(self):
         for player in self.players:
             for worm in player.worms:
                 while True:
                     x = int(random() * (self.dimensions[0] - 1))
                     y = int(random() * (self.dimensions[1] - 1))
-                    if self.terrain[x][y] == 0 and self.terrain[x][y + 1] == 1 and not self.isUnderWater(y):
+                    if self.terrain[x][y] == 0 and self.terrain[x][y + 1] == 1 and not self.is_under_water(y):
                         # if no worm is in a 5x5 square around the worm
                         if not any(
                                 [any([w.x - 2 < x < w.x + 2 and w.y - 2 < y < w.y + 2 for w in player.worms]) for player
@@ -110,9 +108,9 @@ class Partie:
             self.current_worm.active = True
             self.current_worm.canAttack = True
 
-    def applyExplosion(self, x, y, radius, damage=100):
+    def apply_explosion(self, x, y, radius, damage=100):
         for sprite in self.terrain_sprite:
-            if sprite.inRadius(x, y, radius):
+            if sprite.in_radius(x, y, radius):
                 # Remove sprite from surface
                 self.terrain_surface.set_at((int(sprite.x), int(sprite.y)), (0, 0, 0))
                 sprite.kill()
@@ -126,18 +124,18 @@ class Partie:
 
         for player in self.players:
             for worm in player.worms:
-                if worm.inRadius(x, y, radius):
+                if worm.in_radius(x, y, radius):
                     epi_to_worm_vec = (worm.x - x, worm.y - y)
                     distance = math.sqrt(epi_to_worm_vec[0] ** 2 + epi_to_worm_vec[1] ** 2)
                     worm.hp -= damage * (1 - distance / radius)
-                    worm.setVelocityAngle(
-                        self.calculateAngle((x, y), worm.pos),
+                    worm.set_velocity_angle(
+                        self.calculate_angle((x, y), worm.pos),
                         20 * (1 - distance / radius)
                     )
 
         self.sound_explosion.play()
 
-    def enterCrosshair(self):
+    def enter_crosshair(self):
         pygame.event.clear()
         self.__crosshair = True
         selected = False
@@ -152,7 +150,7 @@ class Partie:
         self.draw()
         return self.crosshair_target
 
-    def enterForceMode(self, max_power):
+    def enter_force_mode(self, max_power):
         pygame.event.clear()
         self.__forceMode = True
         self.__max_force = max_power
@@ -181,13 +179,20 @@ class Partie:
         self.draw()
         return self.__force_progress
 
-    def calculateAngle(self, origin, target):
+    @staticmethod
+    def calculate_angle(origin, target):
         base_vec = (1, 0)
         target_vec = (target[0] - origin[0], target[1] - origin[1])
         try:
-            angle = math.acos((base_vec[0] * target_vec[0] + base_vec[1] * target_vec[1]) / (
+            angle = math.acos(
+                (
+                        base_vec[0] * target_vec[0] + base_vec[1] * target_vec[1]
+                ) / (
                     math.sqrt(base_vec[0] ** 2 + base_vec[1] ** 2) * math.sqrt(
-                target_vec[0] ** 2 + target_vec[1] ** 2)))
+                        target_vec[0] ** 2 + target_vec[1] ** 2
+                    )
+                )
+            )
         except ZeroDivisionError:
             angle = math.pi / 2
 
@@ -204,7 +209,8 @@ class Partie:
     def change_wind(self):
         self.wind = vec(random() * 2 - 1, random() * 2 - 1).normalize() * random() * 10
 
-    def rotate_point(self, point, pivot, angle):
+    @staticmethod
+    def rotate_point(point, pivot, angle):
         x, y = point
         px, py = pivot
         angle = math.radians(angle)
@@ -228,21 +234,8 @@ class Partie:
             self.end_game()
         self.draw()
 
-    def isUnderWater(self, y):
+    def is_under_water(self, y):
         return not y < self.dimensions[1] - (self.dimensions[1] * self.water_level)
-
-    '''
-    def drawTerrainArea(self, _x, _y, width, height):
-        # Draw terrain in specified area
-        for x in range(_x, _x+width):
-            for y in range(_y, _y+height):
-                cell = self.terrain[x + self.top_left[0]][y + self.top_left[1]]
-                if self.isUnderWater(y + self.top_left[1]):
-                    color = (255 * cell / 2, 255 * cell / 2, 255 * cell / 2)
-                else:
-                    color = (0, 0, 255 * ((cell + 1) / 2))
-                self.game.window.set_at((x, y), color)
-    '''
 
     def draw(self, window=None):
         self.game.window.fill((0, 0, 0))
@@ -269,7 +262,7 @@ class Partie:
             # Draw a circle in the center of the screen of dimensions height//10
             pygame.draw.circle(self.game.window, (255, 0, 0), (self.dimensions[0] // 2, self.dimensions[1] // 2),
                                self.dimensions[1] // 10, 1)
-            # Draw a circle in the center of the screen, with a radius dependant on the force and with max radius of
+            # Draw a circle in the center of the screen, with a radius dependent on the force and with max radius of
             # height//10 when force is max
             pygame.draw.circle(self.game.window, (255, 0, 0), (self.dimensions[0] // 2, self.dimensions[1] // 2),
                                int(self.__force_progress * self.dimensions[1] / 10 / self.__max_force), 1)
