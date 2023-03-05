@@ -61,6 +61,7 @@ class Worm(KinematicObject):
         self.sound_goutte = pygame.mixer.Sound('assets/sounds/water_death.wav')
         self.sound_grenade_launcher = pygame.mixer.Sound('assets/sounds/grenade_launcher.wav')
         self.sound_cartoon_jump = pygame.mixer.Sound('assets/sounds/cartoon_jump.wav')
+        self.sound_death = pygame.mixer.Sound('assets/sounds/death.wav')
 
     def events(self, event):
         if self.active:
@@ -139,7 +140,7 @@ class Worm(KinematicObject):
             self.grounded = False
 
     def kill(self) -> None:
-        # TODO : Add sound : death
+        self.sound_death.play()
         super().kill()
         self.alive = False
         self.player.player_sprites.remove(self)
