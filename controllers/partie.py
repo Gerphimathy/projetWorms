@@ -1,4 +1,5 @@
 import math
+import sys
 from random import random
 
 import pygame
@@ -12,6 +13,7 @@ from entities.worm import Worm
 from entities.player import Player
 
 from entities.terrain import Terrain
+from menu_actions.menu_style import default_menu_style
 
 vec = pygame.math.Vector2
 
@@ -52,8 +54,12 @@ class Partie:
                     self.terrain_sprite.add(entities.terrain.Terrain(x, y, self.terrain_surface))
 
         colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
-        self.players = [Player(colors[_], w_p_player, self.game, self, [self.all_sprites, self.all_players_sprites])
-                        for _ in range(players)]
+        names = ["Rouge", "Vert", "Bleu", "Jaune", "Violet", "Cyan"]
+        self.players = [
+            Player(colors[_], names[_], w_p_player, self.game, self, [self.all_sprites, self.all_players_sprites])
+            for _ in range(players)]
+
+        self.n_b_players = players
 
         self.placeWorms()
 
@@ -64,6 +70,8 @@ class Partie:
         self.action_points = 0
 
         self.next_player_generator = self.get_next_player()
+
+        self.ranking = []
 
         self.__crosshair = False
         self.crosshair_target = (0, 0)
@@ -199,9 +207,10 @@ class Partie:
     def change_wind(self):
         self.__wind_arrow = True
         self.wind = vec(random() * 2 - 1, random() * 2 - 1).normalize() * random() * 10
-        self.wind_angle = self.calculateAngle((0,0), self.wind)
+        self.wind_angle = self.calculateAngle((0, 0), self.wind)
         self.draw()
         self.__wind_arrow = False
+
     def rotate_point(self, point, pivot, angle):
         x, y = point
         px, py = pivot
@@ -209,10 +218,10 @@ class Partie:
         qx = px + math.cos(angle) * (x - px) - math.sin(angle) * (y - py)
         qy = py + math.sin(angle) * (x - px) + math.cos(angle) * (y - py)
         return int(qx), int(qy)
+
     def events(self, event):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.game.state = "main_menu"
-        # TODO: Pour l'instant, enter --> prochain tour
         # TODO: Afficher les touches pour les actions
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
             self.next_turn()
@@ -220,7 +229,7 @@ class Partie:
 
     def update(self):
         if len(self.players) < 2:
-            self.end_game()  #TODO : add endgame function and fix last worm problem
+            self.end_game()
         for player in self.players:
             player.update()
         self.draw()
@@ -275,14 +284,34 @@ class Partie:
             arrow_points = [(0, 0), (0, -50), (200, 0), (0, 50)]
             rotated_points = []
             for point in arrow_points:
-                rotated_point = self.rotate_point(point, (0,0), self.wind_angle)
+                rotated_point = self.rotate_point(point, (0, 0), self.wind_angle)
                 rotated_points.append((rotated_point[0] + arrow_position[0], rotated_point[1] + arrow_position[1]))
             pygame.draw.polygon(self.game.window, (255, 0, 0), rotated_points)
 
             # TODO: polygon test to remove later
             pygame.draw.polygon(self.game.window, (255, 0, 0), [(50, 50), (200, 70), (400, 60), (120, 120)])
 
-
     def end_game(self):
-        # TODO : END GAME, MENU ?
-        pass
+        if len(self.players) >= 1:
+            self.ranking.append(self.players[0].name)
+
+        style = default_menu_style()
+        for key, value in style.items():
+            if key == 'background_color':
+                self.game.window.fill(value)
+            elif key == 'background_image' and value is not None:
+                self.game.window.blit(value, (0, 0))
+            elif key == 'font':
+                for player_name in self.ranking:
+                    rank = self.n_b_players - self.ranking.index(player_name)
+                    text = value.render(f"{rank} : {player_name}", True, style['font_color'])
+                    self.game.window.blit(text, (0, rank * 30))
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    self.game.state = "main_menu"
+            pygame.display.update()
