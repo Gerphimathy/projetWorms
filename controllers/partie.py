@@ -307,11 +307,13 @@ class Partie:
                     text = value.render(f"{rank} : {player_name}", True, style['font_color'])
                     self.game.window.blit(text, (0, rank * 30))
 
-        while True:
+        in_loop = True
+        while in_loop:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
-                    self.game.state = "main_menu"
+                    in_loop = False
             pygame.display.update()
+        self.game.state = "main_menu"
